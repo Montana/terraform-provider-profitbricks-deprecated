@@ -1,30 +1,89 @@
-# ProfitBricks Provider
+# Terraform ProfitBricks Provider
 
-The ProfitBricks provider is used to interact with the many resources supported by ProfitBricks. Before you begin you will need to have [signed up for a ProfitBricks account.](https://www.profitbricks.com/signup). The credentials you create during sign-up will be used to authenticate against the API.
+* [Introduction](#introduction)
+* [Installation](#installation)
+* [Download Plugin Binaries](#download-plugin-binaries)
+  * [Build Plugin from Source](#build-plugin-from-source)
+* [Plugin Usage](#plugin-usage)
+  * [Credentials](#credentials)
+  * [Basic Example](#basic-example)
+  * [Complex Example](#complex-example)
+* [ProfitBricks Resources](#profitbricks-resources)
+  * [Virtual Data Center](#virtual-data-center)
+  * [Server](#server)
+  * [Volume](#volume)
+  * [NIC](#nic)
+  * [IP Block](#ip-block)
+  * [LAN](#lan)
+  * [Firewall Rule](#firewall-rule)
+  * [Load Balancer](#load-balancer)
+* [Support](#support)
 
-#Installation
+## Introduction
 
-Terraform must first be installed on your machine. Terraform is distributed as a [binary package](https://www.terraform.io/downloads.html) for all supported platforms and architecture.
+The ProfitBricks provider for Terraform is used to interact with the cloud computing and storage resources provided by ProfitBricks. Before you begin you will need to have [signed up for a ProfitBricks account](https://www.profitbricks.com/signup). The credentials you create during sign-up will be used to authenticate against the [Cloud API](https://devops.profitbricks.com/api).
+
+## Installation
+
+Terraform must first be installed on your local machine or wherever you plan to run it from. Terraform is distributed as a [binary package](https://www.terraform.io/downloads.html) for various platforms and architectures.
+
 To install Terraform, find the appropriate package for your system and download it. Terraform is packaged as a zip archive.
 
-After downloading Terraform, unzip the package into a directory where Terraform will be installed. 
+After downloading, unzip the package into a directory where Terraform will be installed. (Example: `~/terraform` or `c:\terraform`)
 
-The final step is to make sure the directory you installed Terraform to is on the PATH.
+The final installation step is to make sure the directory you installed Terraform into is included in the *PATH*.
 
-Example for Linux/Mac - Type the following into your terminal:
+If you plan to run `terraform` in a shell on Linux and placed the binary in `/home/YOUR-USER-NAME/terraform/` then type the following into your terminal:
 
 ```bash
-PATH=/usr/local/terraform/bin:/home/your-user-name/terraform:$PATH
+PATH=$PATH:/home/[YOUR-USER-NAME]/terraform
 ```
-Example for Windows - Type the following into Powershell:
+
+You can view the current value of *$PATH* by running:
+
+```bash
+echo $PATH
+```
+
+If you plan to run `terraform` in a shell on a Mac and placed the binary in `/Users/YOUR-USER-NAME/terraform/` then type the following into your terminal:
+
+```bash
+PATH=$PATH:/Users/[YOUR-USER-NAME]/terraform
+```
+
+You can view the current value of *$PATH* by running:
+
+```bash
+echo $PATH
+```
+
+If you plan to run `terraform.exe` in PowerShell on Windows and placed the binary in `c:\terraform` then type the following into PowerShell:
+
+First look at the existing value of *PATH*:
 
 ```powershell
-set PATH=%PATH%;C:\terraform
+echo $env:Path
 ```
 
-After installing Terraform, verify the installation worked by opening a new terminal session and checking that terraform is available. By executing terraform you should see help output similar to that below:
+If it ends with a **;**, then run:
 
+```powershell
+$env:Path += "c:\terraform"
 ```
+
+If it does **NOT** end with a **;**, then run:
+
+```powershell
+$env:Path += ";c:\terraform"
+```
+
+The adjustments to the *PATH* environment variable as outlined above are *temporary*. There are numerous examples available on the internet describing how to make permanent changes to environment variables for each particular operating system. The [Terraform Installation instructions](https://www.terraform.io/intro/getting-started/install.html) link to a couple examples.
+
+If you do not want to mess around with changing the *PATH* at all, it is usually possible to execute items in a particular directory by entering `./terraform` or providing a full path such as: `c:\terraform\terraform.exe`.
+
+After installing Terraform, verify the installation by executing `terraform` or `terraform.exe`. You  should see the default "usage" output similar to this:
+
+```bash
 $ terraform
 usage: terraform [--version] [--help] <command> [<args>]
 
@@ -45,50 +104,49 @@ Available commands are:
     version     Prints the Terraform version
 ```
 
-##Download plugin binaries 
+## Download Plugin Binaries
 
-Download the desired binaries from https://github.com/profitbricks/terraform-provider-profitbricks/releases. Make sure that the binaries are available in the PATH.
+Download the desired release archive from [ProfitBricks Terraform Provider Releases](https://github.com/profitbricks/terraform-provider-profitbricks/releases). Extract the binary from the archive and place it in the same location you used for the Terraform binary in the previous step. It should have the name `terraform-provider-profitbricks` or `terraform-provider-profitbricks.exe`
 
-```bash
-PATH=/path/to/plugin:/usr/local/terraform/bin:/home/your-user-name/terraform:$PATH
-```
-Example for Windows - Type the following into Powershell:
+The binary should be available in the *PATH* if you made the changes to that enviroment variable as described above.
 
-```powershell
-set PATH=%PATH%;C:\terraform;C:\path\to\plugin
-```
+### Build Plugin from Source
 
-##Build plugin from the source
+This is an optional step. We recommend you utilize the binary releases whenever possible. However, if you would like to build the provider plugin yourself, here is an overview of the necessary steps:
 
-Requirements [GO](https://golang.org/) 
+The build process requires that the [GO](https://golang.org/) language be installed and configured on your system. Getting `go` setup is fairly straight-forward but please pay attention to the [installation instructions](https://golang.org/doc/install) relevant to your operating system.
 
-Get the source code and execute the following: 
+Once you have GO installed and working, then retrieve the Terraform ProfitBricks provider project source code by executing the following command:
 
 ```
 go get github.com/profitbricks/terraform-provider-profitbricks
 ```
 
-Then run the command:
+Then change to the project directory and run `make install`:
 
 ```
 cd $GOPATH/github.com/profitbricks/terraform-provider-profitbricks
+
 make install
 ```
 
+The resulting binary can be copied to the same directory you installed Terraform in, or another appropriate location included in the *PATH*.
 
-# Plugin Usage
-##Credentials
+## Plugin Usage
 
-You can provide your credentials using the `PROFITBRICKS_USERNAME` and `PROFITBRICKS_PASSWORD` 
+We wil go through a basic example of provisioning a server inside a Virtual Data Center after providing Terraform with our credentials.
+
+### Credentials
+
+You can provide your credentials using the `PROFITBRICKS_USERNAME` and `PROFITBRICKS_PASSWORD`
 environment variables, representing your ProfitBricks username and password, respectively.
 
-
 ```
-$ export PROFITBRICKS_USERNAME="profitbricks_username" 
+$ export PROFITBRICKS_USERNAME="profitbricks_username"
 $ export PROFITBRICKS_PASSWORD="profitbricks_password"
 ```
 
-Or you can provide your credentials like this:
+Or you can include your credentials inside the `main.tf` file like this:
 
 ```
 provider "profitbricks" {
@@ -98,13 +156,13 @@ provider "profitbricks" {
 }
 ```
 
-Timeout describes number of retries while waiting for a resource to be provisioned. Default value is 50. 
+Timeout describes the number of retries while waiting for a resource to be provisioned. The default value is 50.
 
-#Simple example
+### Basic Example
 
-In this example we will create a simple Virtual data center with an ubuntu server:
+In this example we will create a Virtual Data Center with an Ubuntu server:
 
-First create configuration directory:
+First create a configuration directory:
 
 ```
 mkdir ~/terraform
@@ -116,20 +174,29 @@ Change your current directory to the newly created directory:
 cd ~/terraform
 ```
 
-Create a text file with extension `.tf`:
+Create the text file `main.tf`. Terraform utilizes files with the extension `.tf` for configuration. **Please Note:** ALL files with the extension `.tf` **WILL** be parsed when running `terraform`, so don't use that extension for files that you don't want it to see.
+
+In a Linux or Mac shell you might utilize `vi`, but any text editor should suffice.
 
 ```
 vi main.tf
 ```
 
-Copy following into main.tf:
+Copy following into `main.tf`:
 
 ```
+// Credentials (unless you are using environment variables for these)
+provider "profitbricks" {
+  username = "profitbricks_username"
+  password = "profitbricks_password"
+  timeout = 100
+}
+
 //Virtual Data Center
 resource "profitbricks_datacenter" "main" {
   name = "datacenter 01"
   location = "us/las"
-  description = "description of the datacenter"
+  description = "Description of the Virtual Data Center"
 }
 
 //Public lan
@@ -156,8 +223,8 @@ resource "profitbricks_server" "webserver" {
   volume {
     name = "system"
     image_name = "${var.ubuntu}"
-    size = 5
-    disk_type = "SSD"
+    size = 15
+    disk_type = "HDD"
     ssh_key_path = "${var.private_key_path}"
     image_password = "test1234"
   }
@@ -189,25 +256,61 @@ resource "profitbricks_server" "webserver" {
 }
 ```
 
-Create variables.tf and add this into it:
+Create the `variables.tf` text file and add these lines to specify Ubuntu 16.04 as the provisioned OS:
 
 ```
-Jasmins-MBP:temp jasmin$ cat variables.tf 
 variable "ubuntu" {
   description = "Ubuntu Server"
   default = "ubuntu-16.04"
 }
+```
 
+We are already setting a password of `test1234` in the `main.tf` file, but we can pass a public SSH key to the build process by placing it in a file and including it in the configuration. This will add the public SSH key to the `/root/.ssh/AUTHORIZED_KEYS` file allowing us to connect using our private SSH key instead of a password. This will work with any of the Linux images provided by ProfitBricks. Once you have your public SSH key saved in `/home/YOUR-USER-NAME/mypublicssh.key`, then add these lines to `variables.tf`:
+
+```
 variable "private_key_path" {
   description = "Path to file containing private key"
-  default = "/path/to/private/key"
+  default = "/home/YOUR-USER-NAME/mypublicssh.key"
 }
 ```
 
-Now you will want to see execution plan:
+If you do not want to provide a public SSH key, then remove the line:
 
 ```
-$terraform plan
+ssh_key_path = "${var.private_key_path}"
+```
+
+from `main.tf`. Also alter the `provisioner` section that installs `nginx` so it uses a `password` instead of a `private_key` for authentication:
+
+```
+provisioner "remote-exec" {
+    inline = [
+      # install nginx
+      "apt-get update",
+      "apt-get -y install nginx"
+    ]
+    connection {
+      type = "ssh"
+      password = "test1234"
+      user = "root"
+      timeout = "4m"
+    }
+  }
+```
+
+otherwise `terraform plan` will generate an error similar to this:
+
+```
+Error configuring: 2 error(s) occurred:
+
+* profitbricks_server.webserver: missing dependency: var.private_key_path
+* profitbricks_server.webserver: missing dependency: var.private_key_path
+```
+
+Now we run `terraform` with the `plan` parameter to review the execution plan:
+
+```
+$ terraform plan
 
 Refreshing Terraform state in-memory prior to plan...
 The refreshed state will be used to calculate this plan, but
@@ -274,7 +377,7 @@ Note: You didn't specify an "-out" parameter to save this plan, so when
     volume.2973529261.discScsiHotUnplug:                 "<computed>"
     volume.2973529261.discVirtioHotPlug:                 "<computed>"
     volume.2973529261.discVirtioHotUnplug:               "<computed>"
-    volume.2973529261.disk_type:                         "SSD"
+    volume.2973529261.disk_type:                         "HDD"
     volume.2973529261.image_password:                    "test1234"
     volume.2973529261.licence_type:                      ""
     volume.2973529261.name:                              "system"
@@ -282,21 +385,21 @@ Note: You didn't specify an "-out" parameter to save this plan, so when
     volume.2973529261.nicHotUnplug:                      "<computed>"
     volume.2973529261.ramHotPlug:                        "<computed>"
     volume.2973529261.ramHotUnplug:                      "<computed>"
-    volume.2973529261.size:                              "5"
-    volume.2973529261.ssh_key_path:                      "/path/to/private/key"
-
+    volume.2973529261.size:                              "15"
+    volume.2973529261.ssh_key_path:                      "/home/YOUR-USER-NAME/mypublicssh.key"
 ```
 
-After you have seen what Terraform will attempt to build the infrastructure run:
+After you have reviewed the `terraform plan` output, proceed to build the infrastructure by running:
 
 ```
-$terraform apply
+terraform apply
 ```
 
-You should see something like this: (truncated)
+You should see output similar to this: (truncated)
+
 ```
 profitbricks_datacenter.main: Creating...
-  description: "" => "description of the datacenter"
+  description: "" => "Description of the Virtual Data Center"
   location:    "" => "us/las"
   name:        "" => "datacenter 01"
 profitbricks_datacenter.main: Creation complete
@@ -347,7 +450,7 @@ profitbricks_server.webserver: Creating...
   volume.2973529261.discScsiHotUnplug:                "" => "<computed>"
   volume.2973529261.discVirtioHotPlug:                "" => "<computed>"
   volume.2973529261.discVirtioHotUnplug:              "" => "<computed>"
-  volume.2973529261.disk_type:                        "" => "SSD"
+  volume.2973529261.disk_type:                        "" => "HDD"
   volume.2973529261.image_password:                   "" => "test1234"
   volume.2973529261.licence_type:                     "" => ""
   volume.2973529261.name:                             "" => "system"
@@ -355,29 +458,44 @@ profitbricks_server.webserver: Creating...
   volume.2973529261.nicHotUnplug:                     "" => "<computed>"
   volume.2973529261.ramHotPlug:                       "" => "<computed>"
   volume.2973529261.ramHotUnplug:                     "" => "<computed>"
-  volume.2973529261.size:                             "" => "5"
-  volume.2973529261.ssh_key_path:                     "" => "/path/to/private/key"
+  volume.2973529261.size:                             "" => "15"
+  volume.2973529261.ssh_key_path:                     "" => "/home/YOUR-USER-NAME/mypublicssh.key"
   ...
   ...
   Apply complete! Resources: 4 added, 0 changed, 0 destroyed.
 ```
 
-If you happen to get stuck, and Terraform is not working as you expect, you can start over by deleting the _terraform.tfstate_ file, and manually destroying the resources that were created usin ProfitBricks DCD.
+If you happen to get stuck, and Terraform is not working as you expect, you can start over by deleting the `terraform.tfstate` file, and manually destroying any resources that were provisioned. This can be done quickly using the [ProfitBricks Data Center Designer (DCD)](https://my.profitbricks.com) or by making calls to the Cloud API using `curl` or another tool for interacting with a REST-based API.
 
-If you want to see more information in the log run following command:
+If you want to have detailed "DEBUG" information included in Terraform's output, you can set the `TF_LOG` environment variable.
+
+From a shell on Linux or Mac, this can be done using `export`:
 
 ```
- export TF_LOG=1
+export TF_LOG=1
 ```
 
-If you wish to update one of the resources in the main.tf, just edit desired resource. For example let's rename the Virtual Data Center:
+In PowerShell on Windows:
+
+```
+$env:TF_LOG = 1
+```
+
+and then verify it was set:
+
+```
+echo $env:TF_LOG
+1
+```
+
+If you wish to **update** one of the resources in the `main.tf`, just edit `main.tf` and make changes to the specific resource. For example, to rename the Virtual Data Center:
 
 ```
 //Virtual Data Center
 resource "profitbricks_datacenter" "main" {
-  name = "datacenter"
+  name = "datacenterrename"
   location = "us/las"
-  description = "description of the datacenter"
+  description = "Description of the Virtual Data Center"
 }
 ...
 ```
@@ -385,7 +503,8 @@ resource "profitbricks_datacenter" "main" {
 After you are done with editing run this:
 
 ```
- terraform plan
+terraform plan
+
 Refreshing Terraform state in-memory prior to plan...
 The refreshed state will be used to calculate this plan, but
 will not be persisted to local or remote state storage.
@@ -405,13 +524,13 @@ Note: You didn't specify an "-out" parameter to save this plan, so when
 "apply" is called, Terraform can't guarantee this is what will execute.
 
 ~ profitbricks_datacenter.main
-    name: "datacenter 01" => "datacenter"
+    name: "datacenter 01" => "datacenterrename"
 
 ```
 
-Terraform will inform you about change that will happen once you run `terraform apply`
+Terraform will inform you about the changes that will happen once you run `terraform apply`. If you are satisfied with the summarized changes, then run `terraform apply`.
 
-To remove the infrastructure you have created run:
+To **remove** the infrastructure you used Terraform to create, run:
 
 ```
 $ terraform destroy
@@ -420,23 +539,48 @@ Do you really want to destroy?
   Terraform will delete all your managed infrastructure.
   There is no undo. Only 'yes' will be accepted to confirm.
 
-  Enter a value: 
+  Enter a value:
 ```
 
-This will remove the entire infrastructure defined in main.tf.
+This will remove the entire infrastructure defined in `main.tf`.
 
-For more complex example see Example section below.
+For a more complex example see the [Complex Example](#complex-example) section below.
 
+### Complex Example
 
-##ProfitBricks Resources
+You can get a working example [from the Github project repository](https://github.com/ProfitBricks/terraform-provider-profitbricks/tree/master/example). Download the two files, `main.tf` and `variables.tf`, place them on the system running Terraform. Then personalize the files contents to your liking.
 
-###Virtual Data Center
+Next run:
+
+```
+terraform plan
+```
+
+Review the output and then apply the configuration by running:
+
+```
+terraform apply
+```
+
+The example files will create a Virtual Data Center with a web server (Nginx) and database server (MongoDB).
+
+Terraform will guide you through the rest of the process.
+
+## ProfitBricks Resources
+
+This section describes the various ProfitBricks resource types that can be deployed using this Terraform provider.
+
+### Virtual Data Center
+
+A Virtual Data Center (VDC) contains all the compute, storage, and networking resources you deploy at ProfitBricks. Therefore, you need to provision a VDC, or provide Terraform with the UUID of an existing one created using the DCD or API.
+
+#### Example Syntax
 
 ```
 resource "profitbricks_datacenter" "example" {
   name = "datacenter name"
   location = "us/las"
-  description = "datacenter description"
+  description = "Virtual Data Center description"
 }
 ```
 
@@ -444,13 +588,17 @@ resource "profitbricks_datacenter" "example" {
 
 The following arguments are supported:
 
-* `name` - (Required)[string] The name of the Virtual Data Center.
-* `location` - (Required)[string] The physical location where the data center will be created. 
-* `description` - (Optional)[string] Description for the data center.
+| Parameter | Required | Type | Description |
+|---|---|---|---|
+| name | Yes | string | The name of the Virtual Data Center. |
+| location | Yes | string |  The physical location where the Virtual Data Center will be created. ["us/las", "de/fra", or "de/fkb"] |
+| description | No | string | A description of the Virtual Data Center. |
 
-###Server
+### Server
 
-This resource will create an operational server. After this section completes, the provisioner can be called.
+This is used to provision a server with associated resources such as processor cores, memory, a primary storage volume, and a network interface.
+
+#### Example Syntax
 
 ```
 resource "profitbricks_server" "example" {
@@ -483,22 +631,28 @@ resource "profitbricks_server" "example" {
    }
 ```
 
-####Argument reference
+#### Argument Reference
 
-* `name` - (Required) [string] The name of the server.
-* `datacenter_id` - (Required)[string] 
-* `cores` - (Required)[integer] Number of server cores.
-* `ram` - (Required)[integer] The amount of memory for the server in MB.
-* `availability_zone` - (Optional)[string] The availability zone in which the server should exist.
-* `licence_type` - (Optional)[string] Sets the OS type of the server.
-* `cpuFamily` - (Optional)[string] Sets the CPU type. "AMD_OPTERON" or "INTEL_XEON". Defaults to "AMD_OPTERON".
-* `volume` -  (Required) See Volume section.
-* `nic` - (Required) See NIC section.
-* `firewall` - (Optional) See Firewall Rule section.
+| Parameter | Required | Type | Description |
+|---|---|---|---|
+| name | Yes | string | The name of the server. |
+| datacenter_id | Yes* | string | The UUID of the Virtual Data Center the server resource is associated with. Terraform will determine this automatically if you are creating the VDC and server at the same time. |
+| cores| Yes | integer |  The number of processor cores assigned to this server. |
+| ram | Yes | integer | The amount of memory assigned to this server in MB. Should be multiples of 256. |
+| availability_zone | No | string | The compute resource availability zone. ["AUTO", "ZONE_1", or "ZONE_2"] |
+| licence_type | No | string | Sets the OS type of the server. ["LINUX", "WINDOWS", or "OTHER"] |
+| cpuFamily | No | string | Sets the CPU type. ["AMD_OPTERON" or "INTEL_XEON"] |
+| volume | Yes | | See Volume section. |
+| nic | Yes | | See NIC section. |
+| firewall | No | | See Firewall Rule section. |
 
-###Volume
+\* See the *Description* column for details.
 
-A primary volume will be created with the server. If there is a need for additional volume, this resource handles it.
+### Volume
+
+A primary volume will be created with the server. If there is a need for additional volumes, this resource handles it.
+
+#### Example Syntax
 
 ```
 resource "profitbricks_volume" "example" {
@@ -512,19 +666,26 @@ resource "profitbricks_volume" "example" {
 }
 ```
 
-####Argument reference
+#### Argument Reference
 
-* `datacenter_id` - (Required) [string] <sup>[1](#myfootnote1)</sup>
-* `server_id` - (Required)[string] <sup>[1](#myfootnote1)</sup>
-* `disk_type` - (Required) [string] The volume type, HDD or SSD.
-* `bus` - (Required) [boolean] The bus type of the volume.
-* `size` -  (Required)[integer] The size of the volume in GB.
-* `image_password` - [string] Required if `sshkey_path` is not provided.
-* `image_name` - [string] The image or snapshot ID. It is required if `licence_type` is not provided.
-* `licence_type` - [string] Required if `image_name` is not provided.
-* `name` - (Optional) [string] The name of the volume.
+| Parameter | Required | Type | Description |
+|---|---|---|---|
+| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| server_id | Yes* | string | UUID of an existing server resource. This parameters is not required if used under Server resource. |
+| disk_type | Yes | string | The storage volume type. ["HDD", or "SSD"] |
+| bus | Yes | string | The bus type of the storage volume. ["VIRTIO", or "IDE"] |
+| size |  Yes | integer | The size of the storage volume in GB. |
+| image_password | Yes* | string | Password set for the `root` or `Administrator` user on ProfitBricks provided images. Required if `sshkey_path` is not provided. |
+| sshkey_path | Yes* | string | Path to a file containing a public SSH key that will be injected into ProfitBricks provided Linux images. Required if `image_password` is not provided. |
+| image_name | Yes* | string | The image or snapshot UUID. It is required if `licence_type` is not provided. |
+| licence_type | Yes* |string | Required if `image_name` is not provided. ["LINUX", "WINDOWS", or "OTHER"] |
+| name | No | string | A name for the storage volume. |
 
-###NIC
+\* See the *Description* column for details.
+
+### NIC
+
+#### Example Syntax
 
 ```
 resource "profitbricks_nic" "example" {
@@ -536,18 +697,23 @@ resource "profitbricks_nic" "example" {
 }
 ```
 
-####Argument reference
+#### Argument Reference
 
-* `datacenter_id` - (Required)[string]<sup>[1](#myfootnote1)</sup>
-* `server_id` - (Required)[string]<sup>[1](#myfootnote1)</sup>
-* `lan` - (Required) [integer] The LAN ID the NIC will sit on. 
-* `name` - (Optional) [string] The name of the LAN.
-* `dhcp` - (Optional) [boolean]
-* `ip` - (Optional) [string] IP assigned to the NIC.
-* `firewall_active` - (Optional) [boolean] If this resource is set to true and is nested under a server resource firewall, with open SSH port, resource must be nested under the nic.
-	
+| Parameter | Required | Type | Description |
+|---|---|---|---|
+| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| server_id | Yes*  | string | UUID of an existing server resource. This parameters is not required if used under Server resource. |
+| lan | Yes | integer | The LAN ID the NIC will sit on. |
+| name| No | string |  The name of the LAN. |
+| dhcp| No| boolean | If the NIC should get an IP using DHCP. |
+| ip | No | string | IP assigned to the NIC. |
+| firewall_active | No | boolean | If this resource is set to `true` and is nested under a server resource firewall, with open SSH port, resource must be nested under the NIC. |
+
+\* See the *Description* column for details.
 
 ### IP Block
+
+#### Example Syntax
 
 ```
 resource "profitbricks_ipblock" "example" {
@@ -556,13 +722,17 @@ resource "profitbricks_ipblock" "example" {
 }
 ```
 
-####Argument reference
+#### Argument Reference
 
-* `location` - (Required)
-* `size` - (Required)
+| Parameter | Required | Type | Description |
+|---|---|---|---|
+| location | Yes | string |  The physical location where the Virtual Data Center will be created. ["us/las", "de/fra", or "de/fkb"] |
+| size | Yes | integer | The number of IP addresses reserved in the IP Block. |
 
 
-###LAN
+### LAN
+
+#### Example Syntax
 
 ```
 resource "profitbricks_lan" "example" {
@@ -571,15 +741,21 @@ resource "profitbricks_lan" "example" {
 }
 ```
 
-####Argument reference
+#### Argument Reference
 
-* `datacenter_id` - (Required) [string]
-* `name` - (Optional) [string] The name of the LAN
-* `public` - (Optional) [Boolean] indicating if the LAN faces the public Internet or not.
+| Parameter | Required | Type | Description |
+|---|---|---|---|
+| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| name | No | string | The name of the LAN |
+| public | No | boolean | Indicates if the LAN faces the public Internet or is "private". |
 
-Currently due to a known issue with ProfitBricks REST, Terraform ProfitBricks Provider doesn't allow creating multiple LAN objects.
+\* See the *Description* column for details.
 
-###Firewall Rule
+**Please Note:** Due to a known issue with ProfitBricks Cloud API, the Terraform ProfitBricks Provider does not currently support creating multiple LAN objects. This should be resolved in the near future.
+
+### Firewall Rule
+
+#### Example Syntax
 
 ```
 resource "profitbricks_firewall" "example" {
@@ -593,24 +769,28 @@ resource "profitbricks_firewall" "example" {
 }
 ```
 
-####Argument reference
+#### Argument Reference
 
-* `datacenter_id` - (Required)[string]
-* `server_id` - (Required)[string] 
-* `nic_id` - (Required)[string] 
-* `protocol` - (Required)[string] The protocol for the rule: TCP, UDP, ICMP, ANY.
-* `name` - (Optional)[string] The name of the firewall rule.
-* `source_mac` - (Optional)[string] Only traffic originating from the respective MAC address is allowed. Valid format: aa:bb:cc:dd:ee:ff.
-* `source_ip` - (Optional)[string] Only traffic originating from the respective IPv4 address is allowed. 
-* `target_ip` - (Optional)[string] Only traffic directed to the respective IP address of the NIC is allowed.
-* `port_range_start` - (Optional)[string] Defines the start range of the allowed port (from 1 to 65534) if protocol TCP or UDP is chosen.
-* `port_range_end` - (Optional)[string] Defines the end range of the allowed port (from 1 to 65534) if the protocol TCP or UDP is chosen.
-* `icmp_type` - (Optional)[string] Defines the allowed type (from 0 to 254) if the protocol ICMP is chosen. 
-* `icmp_code` - (Optional)[string] Defines the allowed code (from 0 to 254) if protocol ICMP is chosen.  
+| Parameter | Required | Type | Description |
+|---|---|---|---|
+| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| server_id | Yes*  | string | UUID of an existing server resource. This parameters is not required if used under Server resource. |
+| nic_id | Yes*  | string | UUID of an existing server resource. This parameters is not required if used under Server resource. |
+| protocol | Yes | string | The protocol for the rule: TCP, UDP, ICMP, ANY. |
+| name | No | string | The name of the firewall rule. |
+| source_mac | No | string | Only traffic originating from the respective MAC address is allowed. Valid format: aa:bb:cc:dd:ee:ff. |
+| source_ip | No | string | Only traffic originating from the respective IPv4 address is allowed. |
+| target_ip | No | string | Only traffic directed to the respective IP address of the NIC is allowed. |
+| port_range_start | No  | string | Defines the start range of the allowed port (from 1 to 65534) if protocol TCP or UDP is chosen. |
+| port_range_end | No | string | Defines the end range of the allowed port (from 1 to 65534) if the protocol TCP or UDP is chosen. |
+icmp_type | No | string | Defines the allowed type (from 0 to 254) if the protocol ICMP is chosen. |
+icmp_code | No | string | Defines the allowed code (from 0 to 254) if protocol ICMP is chosen. |
 
+\* See the *Description* column for details.
 
+### Load Balancer
 
-###Load Balancer
+#### Example Syntax
 
 ```
 resource "profitbricks_loadbalancer" "example" {
@@ -621,34 +801,21 @@ resource "profitbricks_loadbalancer" "example" {
 }
 ```
 
-####Argument reference
+#### Argument Reference
 
-* `datacenter_id` - (Required)[string]
-* `nic_id` - (Required)[string] 
-* `dhcp` - (Optional) [boolean] Indicates if the load balancer will reserve an IP using DHCP.
-* `ip` - (Optional) [string] IPv4 address of the load balancer.
+| Parameter | Required | Type | Description |
+|---|---|---|---|
+| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| nic_id | Yes* | string | |
+| dhcp | No | boolean | Indicates if the load balancer will reserve an IP using DHCP. |
+| ip | No | string | IPv4 address of the load balancer. |
 
+\* See the *Description* column for details.
 
-###Example
+**Please Note:** Due to a known issue with ProfitBricks Cloud API, the Terraform ProfitBricks Provider does not currently support creating Load Balancer objects. This should be resolved in the near future.
 
-You can get a working example [from the Github repository here](https://github.com/profitbricks/terraform-provider-profitbricks/tree/master/example). Just download the two files available and place them in a folder. Then, while located at the folder, run:
+## Support
 
-```
-terraform plan 
-```
+Additional information about the [Terraform CLI](https://www.terraform.io/docs/commands/index.html) is available.
 
-Or to apply the configuration,  run:
-
-```
-terraform apply
-```
-
-This example will create a Virtual Data Center with a web server (nginx) and database server (mongodb).
-Terraform will guide you throught the rest of the process. 
-
-For details about the Terraform CLI please visit https://www.terraform.io/
-
-#Support
-You are welcome to contact us with questions or comments at [ProfitBricks DevOps Central](https://devops.profitbricks.com/). Please report any issues via [GitHub's issue tracker](https://github.com/profitbricks/terraform-provider-profitbricks/issues).
-
-<a name="myfootnote1">1</a>: This parameters is not required if used under Server resource
+You are welcome to contact us with questions or comments at [ProfitBricks DevOps Central](https://devops.profitbricks.com/). Please report any issues via [GitHub's issue tracker](https://github.com/ProfitBricks/terraform-provider-profitbricks/issues).
