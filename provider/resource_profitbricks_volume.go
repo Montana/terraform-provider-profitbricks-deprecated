@@ -40,7 +40,8 @@ func resourceProfitBricksVolume() *schema.Resource {
 				Optional: true,
 			},
 			"ssh_key_path": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
 			"sshkey": {
@@ -72,16 +73,16 @@ func resourceProfitBricksVolumeCreate(d *schema.ResourceData, meta interface{}) 
 	profitbricks.SetAuth(username, password)
 
 	var err error
+	var ssh_keypath []interface{}
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Get("server_id").(string)
-
 	imagePassword := d.Get("image_password").(string)
-	sshkey := d.Get("ssh_key_path").(string)
+	ssh_keypath = d.Get("ssh_key_path").([]interface{})
 	image_name := d.Get("image_name").(string)
 
 	if image_name != "" {
-		if imagePassword == "" && sshkey == "" {
-			return fmt.Errorf("'image_password' and 'sshkey' are not provided.")
+		if imagePassword == "" && len(ssh_keypath) == 0 {
+			return fmt.Errorf("Either 'image_password' or 'sshkey' must be provided.")
 		}
 	}
 
@@ -91,18 +92,18 @@ func resourceProfitBricksVolumeCreate(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Either 'image_name', or 'licenceType' must be set.")
 	}
 
-	var publicKey string
-
-	if sshkey != "" {
-		_, publicKey, err = getSshKey(d, sshkey)
-		if err != nil {
-			return fmt.Errorf("Error fetching sshkeys (%s)", err)
+	var publicKeys []string
+	if len(ssh_keypath) != 0 {
+		for _, path := range ssh_keypath {
+			log.Printf("[DEBUG] Reading file %s", path)
+			publicKey, err := readPublicKey(path.(string))
+			if err != nil {
+				return fmt.Errorf("Error fetching sshkey from file (%s)", path, err)
+			}
+			publicKeys = append(publicKeys, publicKey)
 		}
-		d.Set("sshkey", publicKey)
 	}
-
-	log.Printf("[INFO] public key: %s", publicKey)
-
+	log.Printf("[DEBUG] Total public keys found: %d", len(publicKeys))
 	image := getImageId(d.Get("datacenter_id").(string), image_name, d.Get("disk_type").(string))
 
 	volume := profitbricks.Volume{
@@ -117,8 +118,8 @@ func resourceProfitBricksVolumeCreate(d *schema.ResourceData, meta interface{}) 
 		},
 	}
 
-	if publicKey != "" {
-		volume.Properties.SshKeys = []string{publicKey}
+	if len(publicKeys) != 0 {
+		volume.Properties.SshKeys = publicKeys
 
 	} else {
 		volume.Properties.SshKeys = nil
