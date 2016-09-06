@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"log"
 	"strconv"
+	"errors"
 )
 
 func resourceProfitBricksServer() *schema.Resource {
@@ -596,6 +597,10 @@ func getSshKey(d *schema.ResourceData, path string) (privatekey string, publicke
 	}
 
 	block, _ := pem.Decode(pemBytes)
+
+	if (block == nil) {
+		return "", "", errors.New("File " + path + " contains nothing")
+	}
 
 	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 
