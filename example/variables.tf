@@ -5,5 +5,5 @@ variable "ubuntu" {
 
 variable "private_key_path" {
   description = "Path to file containing private key"
-  default = "/Users/jasmin/.ssh/id_rsa"
+  default = "/Users/{your_username}/.ssh/id_rsa"
 }
