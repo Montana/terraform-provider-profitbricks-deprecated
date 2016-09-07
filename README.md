@@ -706,7 +706,7 @@ resource "profitbricks_nic" "example" {
 | lan | Yes | integer | The LAN ID the NIC will sit on. |
 | name| No | string |  The name of the LAN. |
 | dhcp| No| boolean | If the NIC should get an IP using DHCP. |
-| ip | No | string | IP assigned to the NIC. |
+| ip | No | string | IPs assigned to the NIC. Value to be passed in form of a comma separated string "192.168.1.1,192.168.1.2" |
 | firewall_active | No | boolean | If this resource is set to `true` and is nested under a server resource firewall, with open SSH port, resource must be nested under the NIC. |
 
 \* See the *Description* column for details.

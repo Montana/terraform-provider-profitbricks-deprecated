@@ -12,6 +12,7 @@ import (
 	"log"
 	"strconv"
 	"errors"
+	"strings"
 )
 
 func resourceProfitBricksServer() *schema.Resource {
@@ -240,6 +241,11 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 
 			if rawMap["image_name"] != nil {
 				image = getImageId(d.Get("datacenter_id").(string), rawMap["image_name"].(string), rawMap["disk_type"].(string))
+				if image == "" {
+					dc := profitbricks.GetDatacenter(d.Get("datacenter_id").(string))
+					return fmt.Errorf("Image '%s' doesn't exist. in location %s", rawMap["image_name"], dc.Properties.Location)
+
+				}
 			}
 			if rawMap["licence_type"] != nil {
 				licenceType = rawMap["licence_type"].(string)
@@ -320,8 +326,9 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 			}
 			if rawMap["ip"] != nil {
 				rawIps := rawMap["ip"].(string)
+				ips := strings.Split(rawIps, ",")
 				if rawIps != "" {
-					nic.Properties.Ips = []string{rawMap["ip"].(string)}
+					nic.Properties.Ips = ips
 				}
 			}
 			request.Entities.Nics = &profitbricks.Nics{
@@ -537,8 +544,10 @@ func resourceProfitBricksServerUpdate(d *schema.ResourceData, meta interface{}) 
 			}
 			if rawMap["ip"] != nil {
 				rawIps := rawMap["ip"].(string)
+				ips := strings.Split(rawIps, ",")
+
 				if rawIps != "" {
-					nic.Properties.Ips = []string{rawMap["ip"].(string)}
+					nic.Properties.Ips = ips
 				}
 			}
 			if rawMap["lan"] != nil {
@@ -575,6 +584,16 @@ func resourceProfitBricksServerDelete(d *schema.ResourceData, meta interface{}) 
 
 	profitbricks.SetAuth(username, password)
 	dcId := d.Get("datacenter_id").(string)
+
+	server := profitbricks.GetServer(dcId, d.Id())
+
+	if (server.Properties.BootVolume != nil) {
+		resp := profitbricks.DeleteVolume(dcId, server.Properties.BootVolume.Id)
+		err := waitTillProvisioned(meta, resp.Headers.Get("Location"))
+		if err != nil {
+			return err
+		}
+	}
 
 	resp := profitbricks.DeleteServer(dcId, d.Id())
 	if resp.StatusCode > 299 {
