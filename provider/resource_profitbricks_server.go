@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go"
@@ -11,7 +12,6 @@ import (
 	"io/ioutil"
 	"log"
 	"strconv"
-	"errors"
 	"strings"
 )
 
@@ -100,7 +100,8 @@ func resourceProfitBricksServer() *schema.Resource {
 							Optional: true,
 						},
 						"ssh_key_path": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeList,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 							Optional: true,
 						},
 						"bus": {
@@ -236,7 +237,9 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 
 		for _, raw := range volumeRaw {
 			rawMap := raw.(map[string]interface{})
-			var imagePassword, sshkey_path string
+			var imagePassword string
+			//Can be one file or a list of files
+			var sshkey_path []interface{}
 			var image, licenceType string
 
 			if rawMap["image_name"] != nil {
@@ -255,22 +258,23 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 				imagePassword = rawMap["image_password"].(string)
 			}
 			if rawMap["ssh_key_path"] != nil {
-				sshkey_path = rawMap["ssh_key_path"].(string)
+				sshkey_path = rawMap["ssh_key_path"].([]interface{})
 			}
 			if rawMap["image_name"] != nil {
-				if imagePassword == "" && sshkey_path == "" {
-					return fmt.Errorf("'image_password' and 'ssh_key_path' are not provided.")
+				if imagePassword == "" && len(sshkey_path) == 0 {
+					return fmt.Errorf("Either 'image_password' or 'ssh_key_path' must be provided.")
 				}
 			}
-			var publicKey string
-			var err error
-			if sshkey_path != "" {
-				log.Println("[DEBUG] GETTING THE KEY")
-				_, publicKey, err = getSshKey(d, sshkey_path)
-				if err != nil {
-					return fmt.Errorf("Error fetching sshkeys (%s)", err)
+			var publicKeys []string
+			if len(sshkey_path) != 0 {
+				for _, path := range sshkey_path {
+					log.Printf("[DEBUG] Reading file %s", path)
+					publicKey, err := readPublicKey(path.(string))
+					if err != nil {
+						return fmt.Errorf("Error fetching sshkey from file (%s)", path, err)
+					}
+					publicKeys = append(publicKeys, publicKey)
 				}
-				d.Set("sshkey", publicKey)
 			}
 
 			if image == "" && licenceType == "" {
@@ -295,12 +299,10 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 				},
 			}
 
-			log.Printf("[DEBUG] PUBLIC KEY %s", publicKey)
-
-			if publicKey == "" {
+			if len(publicKeys) == 0 {
 				request.Entities.Volumes.Items[0].Properties.SshKeys = nil
 			} else {
-				request.Entities.Volumes.Items[0].Properties.SshKeys = []string{publicKey}
+				request.Entities.Volumes.Items[0].Properties.SshKeys = publicKeys
 			}
 		}
 
@@ -587,7 +589,7 @@ func resourceProfitBricksServerDelete(d *schema.ResourceData, meta interface{}) 
 
 	server := profitbricks.GetServer(dcId, d.Id())
 
-	if (server.Properties.BootVolume != nil) {
+	if server.Properties.BootVolume != nil {
 		resp := profitbricks.DeleteVolume(dcId, server.Properties.BootVolume.Id)
 		err := waitTillProvisioned(meta, resp.Headers.Get("Location"))
 		if err != nil {
@@ -608,6 +610,20 @@ func resourceProfitBricksServerDelete(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
+//Reads public key from file and returns key string iff valid
+func readPublicKey(path string) (key string, err error) {
+	log.Printf("[DEBUG] Parsing public key from file %s", path)
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	pubKey, _, _, _, err := ssh.ParseAuthorizedKey(bytes)
+	if err != nil {
+		return "", err
+	}
+	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
+}
+
 func getSshKey(d *schema.ResourceData, path string) (privatekey string, publickey string, err error) {
 	pemBytes, err := ioutil.ReadFile(path)
 
@@ -617,7 +633,7 @@ func getSshKey(d *schema.ResourceData, path string) (privatekey string, publicke
 
 	block, _ := pem.Decode(pemBytes)
 
-	if (block == nil) {
+	if block == nil {
 		return "", "", errors.New("File " + path + " contains nothing")
 	}
 
@@ -626,7 +642,6 @@ func getSshKey(d *schema.ResourceData, path string) (privatekey string, publicke
 	if err != nil {
 		return "", "", err
 	}
-
 	priv_blk := pem.Block{
 		Type:    "RSA PRIVATE KEY",
 		Headers: nil,

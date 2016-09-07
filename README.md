@@ -225,7 +225,7 @@ resource "profitbricks_server" "webserver" {
     image_name = "${var.ubuntu}"
     size = 15
     disk_type = "HDD"
-    ssh_key_path = "${var.private_key_path}"
+    ssh_key_path = ["${var.ssh_keys}"]
     image_password = "test1234"
   }
   nic {
@@ -256,28 +256,35 @@ resource "profitbricks_server" "webserver" {
 }
 ```
 
-Create the `variables.tf` text file and add these lines to specify Ubuntu 16.04 as the provisioned OS:
+Create the `variables.tf` text file and add these lines to specify Ubuntu 16.04 as the provisioned OS and add one or more public keys that you want to be added to the provisioned VM:
 
 ```
 variable "ubuntu" {
   description = "Ubuntu Server"
   default = "ubuntu-16.04"
 }
+
+variable "ssh_keys" {
+  description = "List of SSH Keys to be added to the VMs"
+  default = ["/home/YOUR-USER-NAME/.ssh/your_public_key",
+    "/home/ANOTHER-USER/.ssh/another_public_key",
+  ]
+}
 ```
 
-We are already setting a password of `test1234` in the `main.tf` file, but we can pass a public SSH key to the build process by placing it in a file and including it in the configuration. This will add the public SSH key to the `/root/.ssh/AUTHORIZED_KEYS` file allowing us to connect using our private SSH key instead of a password. This will work with any of the Linux images provided by ProfitBricks. Once you have your public SSH key saved in `/home/YOUR-USER-NAME/mypublicssh.key`, then add these lines to `variables.tf`:
+We are already setting a password of `test1234` in the `main.tf` file, but we can pass public SSH key(s) to the build process by placing it in a file and including it in the configuration. This will add the public SSH key(s) to the `/root/.ssh/authorized_keys` file allowing us to connect using our private SSH key instead of a password. This will **ONLY** work with any of the Linux images provided by ProfitBricks. Once you have your private SSH key saved in `/home/YOUR-USER-NAME/my_private_key `, then add these lines to `variables.tf`:
 
 ```
 variable "private_key_path" {
   description = "Path to file containing private key"
-  default = "/home/YOUR-USER-NAME/mypublicssh.key"
+  default = "/home/YOUR-USER-NAME/.ssh/my_private_key"
 }
 ```
 
-If you do not want to provide a public SSH key, then remove the line:
+If you do not want to provide one or more public SSH key(s), then remove the line:
 
 ```
-ssh_key_path = "${var.private_key_path}"
+ssh_key_path = ["${var.ssh_keys}"]
 ```
 
 from `main.tf`. Also alter the `provisioner` section that installs `nginx` so it uses a `password` instead of a `private_key` for authentication:
@@ -386,7 +393,9 @@ Note: You didn't specify an "-out" parameter to save this plan, so when
     volume.2973529261.ramHotPlug:                        "<computed>"
     volume.2973529261.ramHotUnplug:                      "<computed>"
     volume.2973529261.size:                              "15"
-    volume.2973529261.ssh_key_path:                      "/home/YOUR-USER-NAME/mypublicssh.key"
+    volume.2973529261.ssh_key_path.#:                    "2"
+    volume.2973529261.ssh_key_path.0:                    "/home/YOUR-USER-NAME/.ssh/your_public_key"
+    volume.2973529261.ssh_key_path.1:                    "/home/ANOTHER-USER/.ssh/another_public_key"
 ```
 
 After you have reviewed the `terraform plan` output, proceed to build the infrastructure by running:
@@ -459,7 +468,9 @@ profitbricks_server.webserver: Creating...
   volume.2973529261.ramHotPlug:                       "" => "<computed>"
   volume.2973529261.ramHotUnplug:                     "" => "<computed>"
   volume.2973529261.size:                             "" => "15"
-  volume.2973529261.ssh_key_path:                     "" => "/home/YOUR-USER-NAME/mypublicssh.key"
+  volume.2973529261.ssh_key_path.#:                   "2"
+  volume.2973529261.ssh_key_path.0:                   "/home/YOUR-USER-NAME/.ssh/your_public_key"
+  volume.2973529261.ssh_key_path.1:                   "/home/ANOTHER-USER/.ssh/another_public_key"
   ...
   ...
   Apply complete! Resources: 4 added, 0 changed, 0 destroyed.
