@@ -103,7 +103,6 @@ func resourceProfitBricksVolumeCreate(d *schema.ResourceData, meta interface{}) 
 			publicKeys = append(publicKeys, publicKey)
 		}
 	}
-	log.Printf("[DEBUG] Total public keys found: %d", len(publicKeys))
 	image := getImageId(d.Get("datacenter_id").(string), image_name, d.Get("disk_type").(string))
 
 	volume := profitbricks.Volume{

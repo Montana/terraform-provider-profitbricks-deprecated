@@ -273,7 +273,6 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 					if err != nil {
 						return fmt.Errorf("Error fetching sshkey from file (%s)", path, err)
 					}
-					log.Printf("[DEBUG] Found public key %s", publicKey)
 					publicKeys = append(publicKeys, publicKey)
 				}
 			}
