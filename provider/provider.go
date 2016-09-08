@@ -3,9 +3,10 @@ package profitbricks
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/profitbricks/profitbricks-sdk-go"
 )
 
-// Provider returns a schema.Provider for DigitalOcean.
+// Provider returns a schema.Provider for ProfitBricks.
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -20,6 +21,12 @@ func Provider() terraform.ResourceProvider {
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("PROFITBRICKS_PASSWORD", nil),
 				Description: "Profitbricks password for API operations.",
+			},
+			"endpoint": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("PROFITBRICKS_API_URL", profitbricks.Endpoint),
+				Description: "Profitbricks REST API URL.",
 			},
 			"timeout": {
 				Type:     schema.TypeInt,
@@ -46,8 +53,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := Config{
 		Username: d.Get("username").(string),
 		Password: d.Get("password").(string),
+		Endpoint: d.Get("endpoint").(string),
 		Timeout:  d.Get("timeout").(int),
 	}
-
 	return config.Client()
 }

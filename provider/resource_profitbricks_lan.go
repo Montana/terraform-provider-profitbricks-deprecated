@@ -36,9 +36,7 @@ func resourceProfitBricksLan() *schema.Resource {
 }
 
 func resourceProfitBricksLanCreate(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
-	profitbricks.SetDepth("5")
+	getCredentials(meta)
 	request := profitbricks.Lan{
 		Properties: profitbricks.LanProperties{
 			Public: d.Get("public").(bool),
@@ -68,8 +66,7 @@ func resourceProfitBricksLanCreate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceProfitBricksLanRead(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 
 	lan := profitbricks.GetLan(d.Get("datacenter_id").(string), d.Id())
 
@@ -84,8 +81,7 @@ func resourceProfitBricksLanRead(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceProfitBricksLanUpdate(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 	properties := &profitbricks.LanProperties{}
 	if d.HasChange("public") {
 		_, newValue := d.GetChange("public")
@@ -110,9 +106,7 @@ func resourceProfitBricksLanUpdate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceProfitBricksLanDelete(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
-
+	getCredentials(meta)
 	resp := profitbricks.DeleteLan(d.Get("datacenter_id").(string), d.Id())
 	if resp.StatusCode > 299 {
 		//try again in 20 seconds

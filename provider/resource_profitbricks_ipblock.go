@@ -37,8 +37,7 @@ func resourceProfitBricksIPBlock() *schema.Resource {
 }
 
 func resourceProfitBricksIPBlockCreate(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 
 	ipblock := profitbricks.IpBlock{
 		Properties: profitbricks.IpBlockProperties{
@@ -62,8 +61,7 @@ func resourceProfitBricksIPBlockCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceProfitBricksIPBlockRead(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 
 	ipblock := profitbricks.GetIpBlock(d.Id())
 
@@ -81,8 +79,7 @@ func resourceProfitBricksIPBlockRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceProfitBricksIPBlockDelete(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 
 	resp := profitbricks.ReleaseIpBlock(d.Id())
 	if resp.StatusCode > 299 {

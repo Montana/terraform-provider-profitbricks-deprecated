@@ -42,8 +42,7 @@ func resourceProfitBricksDatacenter() *schema.Resource {
 }
 
 func resourceProfitBricksDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 
 	datacenter := profitbricks.Datacenter{
 		Properties: profitbricks.DatacenterProperties{
@@ -73,9 +72,7 @@ func resourceProfitBricksDatacenterCreate(d *schema.ResourceData, meta interface
 }
 
 func resourceProfitBricksDatacenterRead(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 	datacenter := profitbricks.GetDatacenter(d.Id())
 	if datacenter.StatusCode > 299 {
 		return fmt.Errorf("Error while fetching a data center ID %s %s", d.Id(), datacenter.Response)
@@ -88,9 +85,7 @@ func resourceProfitBricksDatacenterRead(d *schema.ResourceData, meta interface{}
 }
 
 func resourceProfitBricksDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 
 	obj := profitbricks.DatacenterProperties{}
 
@@ -111,9 +106,8 @@ func resourceProfitBricksDatacenterUpdate(d *schema.ResourceData, meta interface
 }
 
 func resourceProfitBricksDatacenterDelete(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
+	getCredentials(meta)
 
-	profitbricks.SetAuth(username, password)
 	dcid := d.Id()
 	resp := profitbricks.DeleteDatacenter(dcid)
 
@@ -129,8 +123,7 @@ func resourceProfitBricksDatacenterDelete(d *schema.ResourceData, meta interface
 }
 
 func waitTillProvisioned(meta interface{}, path string) error {
-	username, password, timeout := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
+	_, _, timeout := getCredentials(meta)
 	//log.Printf("[DEBUG] Request status path: %s", path)
 	waitCount := 50
 
@@ -164,8 +157,12 @@ func getCredentials(meta interface{}) (username, password string, timeout int) {
 	creds := meta.(string)
 
 	splitv := strings.Split(creds, ",")
-	username, password, to := splitv[0], splitv[1], splitv[2]
+	username, password, to, endpoint := splitv[0], splitv[1], splitv[2], splitv[3]
 	timeout, _ = strconv.Atoi(to)
+
+	profitbricks.SetAuth(username, password)
+	profitbricks.SetEndpoint(endpoint)
+	profitbricks.SetDepth("5")
 	return username, password, timeout
 }
 

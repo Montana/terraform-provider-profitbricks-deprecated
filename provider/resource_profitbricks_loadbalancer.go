@@ -43,9 +43,7 @@ func resourceProfitBricksLoadbalancer() *schema.Resource {
 }
 
 func resourceProfitBricksLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
-
+	getCredentials(meta)
 	lb := profitbricks.Loadbalancer{
 		Properties: profitbricks.LoadbalancerProperties{
 			Name: d.Get("name").(string),
@@ -91,9 +89,7 @@ func resourceProfitBricksLoadbalancerRead(d *schema.ResourceData, meta interface
 }
 
 func resourceProfitBricksLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
-
+	getCredentials(meta)
 	properties := profitbricks.LoadbalancerProperties{}
 	if d.HasChange("name") {
 		_, new := d.GetChange("name")
@@ -134,8 +130,7 @@ func resourceProfitBricksLoadbalancerUpdate(d *schema.ResourceData, meta interfa
 }
 
 func resourceProfitBricksLoadbalancerDelete(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 
 	resp := profitbricks.DeleteLoadbalancer(d.Get("datacenter_id").(string), d.Id())
 

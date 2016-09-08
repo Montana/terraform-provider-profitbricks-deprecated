@@ -85,8 +85,7 @@ func resourceProfitBricksFirewall() *schema.Resource {
 }
 
 func resourceProfitBricksFirewallCreate(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 
 	fw := profitbricks.FirewallRule{
 		Properties: profitbricks.FirewallruleProperties{
@@ -135,9 +134,7 @@ func resourceProfitBricksFirewallCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceProfitBricksFirewallRead(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
-
+	getCredentials(meta)
 	fw := profitbricks.GetFirewallRule(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id())
 
 	if fw.StatusCode > 299 {
@@ -159,9 +156,7 @@ func resourceProfitBricksFirewallRead(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceProfitBricksFirewallUpdate(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
-
+	getCredentials(meta)
 	properties := profitbricks.FirewallruleProperties{}
 
 	if d.HasChange("name") {
@@ -219,8 +214,7 @@ func resourceProfitBricksFirewallUpdate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceProfitBricksFirewallDelete(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 	log.Printf("[DEBUG] Datacenter ID: %s", d.Get("datacenter_id").(string))
 	log.Printf("[DEBUG] Server ID: %s", d.Get("server_id").(string))
 	log.Printf("[DEBUG] NIC ID: %s", d.Get("nic_id").(string))
