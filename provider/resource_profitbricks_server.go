@@ -211,9 +211,7 @@ func resourceProfitBricksServer() *schema.Resource {
 }
 
 func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 	request := profitbricks.Server{
 		Properties: profitbricks.ServerProperties{
 			Name:  d.Get("name").(string),
@@ -421,9 +419,7 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 	dcId := d.Get("datacenter_id").(string)
 
 	server := profitbricks.GetServer(dcId, d.Id())
@@ -461,9 +457,7 @@ func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceProfitBricksServerUpdate(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 	dcId := d.Get("datacenter_id").(string)
 
 	request := profitbricks.ServerProperties{}
@@ -489,7 +483,6 @@ func resourceProfitBricksServerUpdate(d *schema.ResourceData, meta interface{}) 
 		request.CpuFamily = n.(string)
 	}
 	server := profitbricks.PatchServer(dcId, d.Id(), request)
-	log.Println("[INFO] hlab hlab", request)
 
 	//Volume stuff
 	if d.HasChange("volume") {
@@ -513,7 +506,6 @@ func resourceProfitBricksServerUpdate(d *schema.ResourceData, meta interface{}) 
 		}
 
 		volume = profitbricks.PatchVolume(d.Get("datacenter_id").(string), server.Entities.Volumes.Items[0].Id, properties)
-		log.Println("[INFO] blah blah", properties)
 
 		if volume.StatusCode > 299 {
 			return fmt.Errorf("Error patching volume (%s) (%s)", d.Id(), volume.Response)
@@ -561,7 +553,6 @@ func resourceProfitBricksServerUpdate(d *schema.ResourceData, meta interface{}) 
 		}
 
 		nic = profitbricks.PatchNic(d.Get("datacenter_id").(string), server.Id, server.Entities.Nics.Items[0].Id, properties)
-		log.Println("[INFO] blah blah", properties)
 
 		if nic.StatusCode > 299 {
 			return fmt.Errorf(
@@ -582,9 +573,7 @@ func resourceProfitBricksServerUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceProfitBricksServerDelete(d *schema.ResourceData, meta interface{}) error {
-	username, password, _ := getCredentials(meta)
-
-	profitbricks.SetAuth(username, password)
+	getCredentials(meta)
 	dcId := d.Get("datacenter_id").(string)
 
 	server := profitbricks.GetServer(dcId, d.Id())
