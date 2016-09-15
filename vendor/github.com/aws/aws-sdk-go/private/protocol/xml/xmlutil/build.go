@@ -1,4 +1,4 @@
-// Package xmlutil provides XML serialisation of AWS requests and responses.
+// Package xmlutil provides XML serialization of AWS requests and responses.
 package xmlutil
 
 import (
@@ -50,11 +50,9 @@ type xmlBuilder struct {
 // type is not provided reflect will be used to determine the value's type.
 func (b *xmlBuilder) buildValue(value reflect.Value, current *XMLNode, tag reflect.StructTag) error {
 	value = elemOf(value)
-	if !value.IsValid() {
-		// no need to handle zero values
+	if !value.IsValid() { // no need to handle zero values
 		return nil
-	} else if tag.Get("location") != "" {
-		// don't handle non-body location values
+	} else if tag.Get("location") != "" { // don't handle non-body location values
 		return nil
 	}
 
@@ -131,8 +129,7 @@ func (b *xmlBuilder) buildStruct(value reflect.Value, current *XMLNode, tag refl
 		}
 
 		mTag := field.Tag
-		if mTag.Get("location") != "" {
-			// skip non-body members
+		if mTag.Get("location") != "" { // skip non-body members
 			continue
 		}
 
@@ -153,8 +150,7 @@ func (b *xmlBuilder) buildStruct(value reflect.Value, current *XMLNode, tag refl
 		fieldAdded = true
 	}
 
-	if fieldAdded {
-		// only append this child if we have one ore more valid members
+	if fieldAdded { // only append this child if we have one ore more valid members
 		current.AddChild(child)
 	}
 
@@ -164,8 +160,7 @@ func (b *xmlBuilder) buildStruct(value reflect.Value, current *XMLNode, tag refl
 // buildList adds the value's list items to the current XMLNode as children nodes. All
 // nested values in the list are converted to XMLNodes also.
 func (b *xmlBuilder) buildList(value reflect.Value, current *XMLNode, tag reflect.StructTag) error {
-	if value.IsNil() {
-		// don't build omitted lists
+	if value.IsNil() { // don't build omitted lists
 		return nil
 	}
 
@@ -207,8 +202,7 @@ func (b *xmlBuilder) buildList(value reflect.Value, current *XMLNode, tag reflec
 //
 // Error will be returned if it is unable to build the map's values into XMLNodes
 func (b *xmlBuilder) buildMap(value reflect.Value, current *XMLNode, tag reflect.StructTag) error {
-	if value.IsNil() {
-		// don't build omitted maps
+	if value.IsNil() { // don't build omitted maps
 		return nil
 	}
 
@@ -235,8 +229,7 @@ func (b *xmlBuilder) buildMap(value reflect.Value, current *XMLNode, tag reflect
 		v := value.MapIndex(reflect.ValueOf(k))
 
 		mapcur := current
-		if tag.Get("flattened") == "" {
-			// add "entry" tag to non-flat maps
+		if tag.Get("flattened") == "" { // add "entry" tag to non-flat maps
 			child := NewXMLElement(xml.Name{Local: "entry"})
 			mapcur.AddChild(child)
 			mapcur = child
@@ -290,12 +283,10 @@ func (b *xmlBuilder) buildScalar(value reflect.Value, current *XMLNode, tag refl
 	}
 
 	xname := xml.Name{Local: tag.Get("locationName")}
-	if tag.Get("xmlAttribute") != "" {
-		// put into current node's attribute list
+	if tag.Get("xmlAttribute") != "" { // put into current node's attribute list
 		attr := xml.Attr{Name: xname, Value: str}
 		current.Attr = append(current.Attr, attr)
-	} else {
-		// regular text node
+	} else { // regular text node
 		current.AddChild(&XMLNode{Name: xname, Text: str})
 	}
 	return nil

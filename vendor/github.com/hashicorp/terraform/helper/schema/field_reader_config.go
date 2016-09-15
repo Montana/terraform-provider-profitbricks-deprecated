@@ -23,9 +23,7 @@ type ConfigFieldReader struct {
 }
 
 func (r *ConfigFieldReader) ReadField(address []string) (FieldReadResult, error) {
-	r.once.Do(func() {
-		r.indexMaps = make(map[string]map[string]int)
-	})
+	r.once.Do(func() { r.indexMaps = make(map[string]map[string]int) })
 	return r.readField(address, false)
 }
 

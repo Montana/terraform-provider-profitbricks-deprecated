@@ -25,7 +25,7 @@ func Walk(node Node, fn WalkFunc) Node {
 			n.Items[i] = Walk(item, fn).(*ObjectItem)
 		}
 	case *ObjectKey:
-	// nothing to do
+		// nothing to do
 	case *ObjectItem:
 		for i, k := range n.Keys {
 			n.Keys[i] = Walk(k, fn).(*ObjectKey)
@@ -35,7 +35,7 @@ func Walk(node Node, fn WalkFunc) Node {
 			n.Val = Walk(n.Val, fn)
 		}
 	case *LiteralType:
-	// nothing to do
+		// nothing to do
 	case *ListType:
 		for i, l := range n.List {
 			n.List[i] = Walk(l, fn)

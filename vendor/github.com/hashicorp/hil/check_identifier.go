@@ -36,9 +36,9 @@ func (c *IdentifierCheck) visit(raw ast.Node) ast.Node {
 	case *ast.VariableAccess:
 		c.visitVariableAccess(n)
 	case *ast.Output:
-	// Ignore
+		// Ignore
 	case *ast.LiteralNode:
-	// Ignore
+		// Ignore
 	default:
 		// Ignore
 	}

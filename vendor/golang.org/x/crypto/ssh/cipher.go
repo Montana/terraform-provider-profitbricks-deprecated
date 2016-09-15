@@ -403,9 +403,7 @@ const (
 // cbcError represents a verification error that may leak information.
 type cbcError string
 
-func (e cbcError) Error() string {
-	return string(e)
-}
+func (e cbcError) Error() string { return string(e) }
 
 func (c *cbcCipher) readPacket(seqNum uint32, r io.Reader) ([]byte, error) {
 	p, err := c.readPacketLeaky(seqNum, r)

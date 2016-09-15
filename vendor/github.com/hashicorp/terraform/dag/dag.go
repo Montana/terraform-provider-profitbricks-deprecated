@@ -332,12 +332,7 @@ func (g *AcyclicGraph) ReverseDepthFirstWalk(start []Vertex, f DepthWalkFunc) er
 		}
 		seen[current.Vertex] = struct{}{}
 
-		// Visit the current node
-		if err := f(current.Vertex, current.Depth); err != nil {
-			return err
-		}
-
-		// Visit targets of this in a consistent order.
+		// Add next set of targets in a consistent order.
 		targets := AsVertexList(g.UpEdges(current.Vertex))
 		sort.Sort(byVertexName(targets))
 		for _, t := range targets {
@@ -345,6 +340,11 @@ func (g *AcyclicGraph) ReverseDepthFirstWalk(start []Vertex, f DepthWalkFunc) er
 				Vertex: t,
 				Depth:  current.Depth + 1,
 			})
+		}
+
+		// Visit the current node
+		if err := f(current.Vertex, current.Depth); err != nil {
+			return err
 		}
 	}
 
@@ -355,12 +355,8 @@ func (g *AcyclicGraph) ReverseDepthFirstWalk(start []Vertex, f DepthWalkFunc) er
 // consistently by their VertexName
 type byVertexName []Vertex
 
-func (b byVertexName) Len() int {
-	return len(b)
-}
-func (b byVertexName) Swap(i, j int) {
-	b[i], b[j] = b[j], b[i]
-}
+func (b byVertexName) Len() int      { return len(b) }
+func (b byVertexName) Swap(i, j int) { b[i], b[j] = b[j], b[i] }
 func (b byVertexName) Less(i, j int) bool {
 	return VertexName(b[i]) < VertexName(b[j])
 }

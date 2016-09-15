@@ -42,6 +42,10 @@ func hilMapstructureWeakDecode(m interface{}, rawVal interface{}) error {
 }
 
 func InterfaceToVariable(input interface{}) (ast.Variable, error) {
+	if inputVariable, ok := input.(ast.Variable); ok {
+		return inputVariable, nil
+	}
+
 	var stringVal string
 	if err := hilMapstructureWeakDecode(input, &stringVal); err == nil {
 		return ast.Variable{
@@ -140,5 +144,5 @@ func VariableToInterface(input ast.Variable) (interface{}, error) {
 		return result, nil
 	}
 
-	return nil, fmt.Errorf("Find")
+	return nil, fmt.Errorf("unknown input type: %s", input.Type)
 }

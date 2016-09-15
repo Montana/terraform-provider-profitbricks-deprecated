@@ -19,7 +19,7 @@ func FixedValueTransform(root ast.Node, Value *ast.LiteralNode) ast.Node {
 			n.Exprs[i] = FixedValueTransform(v, Value)
 		}
 	case *ast.LiteralNode:
-	// We keep it as-is
+		// We keep it as-is
 	default:
 		// Anything else we replace
 		result = Value

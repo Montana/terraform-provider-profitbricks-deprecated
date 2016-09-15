@@ -172,9 +172,7 @@ func (g *Graph) walk(walker GraphWalker) error {
 		log.Printf("[DEBUG] vertex %s.%s: walking", path, dag.VertexName(v))
 
 		walker.EnterVertex(v)
-		defer func() {
-			walker.ExitVertex(v, rerr)
-		}()
+		defer func() { walker.ExitVertex(v, rerr) }()
 
 		// vertexCtx is the context that we use when evaluating. This
 		// is normally the context of our graph but can be overridden

@@ -296,7 +296,7 @@ func (s *Scanner) scanString() {
 			return
 		}
 
-		if ch == '"' && braces == 0 {
+		if ch == '"' {
 			break
 		}
 
@@ -325,7 +325,7 @@ func (s *Scanner) scanEscape() rune {
 	ch := s.next() // read character after '/'
 	switch ch {
 	case 'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', '"':
-	// nothing to do
+		// nothing to do
 	case '0', '1', '2', '3', '4', '5', '6', '7':
 		// octal notation
 		ch = s.scanDigits(ch, 8, 3)

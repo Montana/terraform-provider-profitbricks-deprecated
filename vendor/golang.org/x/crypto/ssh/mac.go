@@ -42,9 +42,7 @@ func (t truncatingMAC) Size() int {
 	return t.length
 }
 
-func (t truncatingMAC) BlockSize() int {
-	return t.hmac.BlockSize()
-}
+func (t truncatingMAC) BlockSize() int { return t.hmac.BlockSize() }
 
 var macModes = map[string]*macMode{
 	"hmac-sha2-256": {32, func(key []byte) hash.Hash {

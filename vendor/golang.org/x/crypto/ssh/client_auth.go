@@ -145,9 +145,7 @@ func (cb passwordCallback) method() string {
 
 // Password returns an AuthMethod using the given password.
 func Password(secret string) AuthMethod {
-	return passwordCallback(func() (string, error) {
-		return secret, nil
-	})
+	return passwordCallback(func() (string, error) { return secret, nil })
 }
 
 // PasswordCallback returns an AuthMethod that uses a callback for
@@ -272,7 +270,7 @@ func confirmKeyAck(key PublicKey, c packetConn) (bool, error) {
 		}
 		switch packet[0] {
 		case msgUserAuthBanner:
-		// TODO(gpaul): add callback to present the banner to the user
+			// TODO(gpaul): add callback to present the banner to the user
 		case msgUserAuthPubKeyOk:
 			var msg userAuthPubKeyOkMsg
 			if err := Unmarshal(packet, &msg); err != nil {
@@ -293,9 +291,7 @@ func confirmKeyAck(key PublicKey, c packetConn) (bool, error) {
 // PublicKeys returns an AuthMethod that uses the given key
 // pairs.
 func PublicKeys(signers ...Signer) AuthMethod {
-	return publicKeyCallback(func() ([]Signer, error) {
-		return signers, nil
-	})
+	return publicKeyCallback(func() ([]Signer, error) { return signers, nil })
 }
 
 // PublicKeysCallback returns an AuthMethod that runs the given
@@ -316,7 +312,7 @@ func handleAuthResponse(c packetConn) (bool, []string, error) {
 
 		switch packet[0] {
 		case msgUserAuthBanner:
-		// TODO: add callback to present the banner to the user
+			// TODO: add callback to present the banner to the user
 		case msgUserAuthFailure:
 			var msg userAuthFailureMsg
 			if err := Unmarshal(packet, &msg); err != nil {
@@ -381,7 +377,7 @@ func (cb KeyboardInteractiveChallenge) auth(session []byte, user string, c packe
 			// TODO: Print banners during userauth.
 			continue
 		case msgUserAuthInfoRequest:
-		// OK
+			// OK
 		case msgUserAuthFailure:
 			var msg userAuthFailureMsg
 			if err := Unmarshal(packet, &msg); err != nil {

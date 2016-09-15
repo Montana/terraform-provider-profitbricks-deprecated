@@ -1,4 +1,4 @@
-// Package query provides serialisation of AWS query requests, and responses.
+// Package query provides serialization of AWS query requests, and responses.
 package query
 
 //go:generate go run ../../../models/protocol_tests/generate.go ../../../models/protocol_tests/input/query.json build_test.go
@@ -29,8 +29,7 @@ func Build(r *request.Request) {
 		r.HTTPRequest.Method = "POST"
 		r.HTTPRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
 		r.SetBufferBody([]byte(body.Encode()))
-	} else {
-		// This is a pre-signed request
+	} else { // This is a pre-signed request
 		r.HTTPRequest.Method = "GET"
 		r.HTTPRequest.URL.RawQuery = body.Encode()
 	}

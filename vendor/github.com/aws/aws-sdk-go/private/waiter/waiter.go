@@ -84,7 +84,7 @@ func (w *Waiter) Wait() error {
 					result = aerr.Code() == a.Expected.(string)
 				}
 			case "pathList":
-			// ignored matcher
+				// ignored matcher
 			default:
 				logf(client, "WARNING: Waiter for %s encountered unexpected matcher: %s",
 					w.Config.Operation, a.Matcher)

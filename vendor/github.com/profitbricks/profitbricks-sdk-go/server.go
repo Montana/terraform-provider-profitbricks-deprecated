@@ -3,7 +3,6 @@ package profitbricks
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -81,7 +80,6 @@ func GetServer(dcid, srvid string) Server {
 	path := server_path(dcid, srvid)
 	url := mk_url(path) + `?depth=` + Depth
 	req, _ := http.NewRequest("GET", url, nil)
-	fmt.Println(path)
 	req.Header.Add("Content-Type", FullHeader)
 	return toServer(do(req))
 }

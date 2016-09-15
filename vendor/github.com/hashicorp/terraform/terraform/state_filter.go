@@ -94,6 +94,11 @@ func (f *StateFilter) filterSingle(a *ResourceAddress) []*StateFilterResult {
 					continue
 				}
 
+				if a.Name != "" && a.Name != key.Name {
+					// Name doesn't match
+					continue
+				}
+
 				if a.Index >= 0 && key.Index != a.Index {
 					// Index doesn't match
 					continue
@@ -233,12 +238,8 @@ func (r *StateFilterResult) sortedType() int {
 // human output.
 type StateFilterResultSlice []*StateFilterResult
 
-func (s StateFilterResultSlice) Len() int {
-	return len(s)
-}
-func (s StateFilterResultSlice) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
+func (s StateFilterResultSlice) Len() int      { return len(s) }
+func (s StateFilterResultSlice) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 func (s StateFilterResultSlice) Less(i, j int) bool {
 	a, b := s[i], s[j]
 

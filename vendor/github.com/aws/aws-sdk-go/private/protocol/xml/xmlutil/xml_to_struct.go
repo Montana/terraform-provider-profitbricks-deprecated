@@ -66,8 +66,7 @@ func XMLToStruct(d *xml.Decoder, s *xml.StartElement) (*XMLNode, error) {
 			slice = append(slice, node)
 			out.Children[name] = slice
 		case xml.EndElement:
-			if s != nil && s.Name.Local == typed.Name.Local {
-				// matching end token
+			if s != nil && s.Name.Local == typed.Name.Local { // matching end token
 				return out, nil
 			}
 		}

@@ -27,9 +27,6 @@ func Unquote(s string) (t string, err error) {
 	if quote != '"' {
 		return "", ErrSyntax
 	}
-	if contains(s, '\n') {
-		return "", ErrSyntax
-	}
 
 	// Is it trivial?  Avoid allocation.
 	if !contains(s, '\\') && !contains(s, quote) && !contains(s, '$') {
@@ -216,8 +213,7 @@ func unquoteChar(s string, quote byte) (value rune, multibyte bool, tail string,
 			err = ErrSyntax
 			return
 		}
-		for j := 0; j < 2; j++ {
-			// one digit already; two more
+		for j := 0; j < 2; j++ { // one digit already; two more
 			x := rune(s[j]) - '0'
 			if x < 0 || x > 7 {
 				err = ErrSyntax

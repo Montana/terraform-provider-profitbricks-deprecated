@@ -80,21 +80,15 @@ func (t Type) String() string {
 
 // IsIdentifier returns true for tokens corresponding to identifiers and basic
 // type literals; it returns false otherwise.
-func (t Type) IsIdentifier() bool {
-	return identifier_beg < t && t < identifier_end
-}
+func (t Type) IsIdentifier() bool { return identifier_beg < t && t < identifier_end }
 
 // IsLiteral returns true for tokens corresponding to basic type literals; it
 // returns false otherwise.
-func (t Type) IsLiteral() bool {
-	return literal_beg < t && t < literal_end
-}
+func (t Type) IsLiteral() bool { return literal_beg < t && t < literal_end }
 
 // IsOperator returns true for tokens corresponding to operators and
 // delimiters; it returns false otherwise.
-func (t Type) IsOperator() bool {
-	return operator_beg < t && t < operator_end
-}
+func (t Type) IsOperator() bool { return operator_beg < t && t < operator_end }
 
 // String returns the token's literal text. Note that this is only
 // applicable for certain token types, such as token.IDENT,

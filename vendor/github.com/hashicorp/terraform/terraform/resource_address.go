@@ -52,7 +52,7 @@ func (r *ResourceAddress) String() string {
 
 	switch r.Mode {
 	case config.ManagedResourceMode:
-	// nothing to do
+		// nothing to do
 	case config.DataResourceMode:
 		result = append(result, "data")
 	default:

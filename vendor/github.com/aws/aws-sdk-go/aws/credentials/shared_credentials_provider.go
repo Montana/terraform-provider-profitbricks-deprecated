@@ -123,8 +123,7 @@ func (p *SharedCredentialsProvider) filename() (string, error) {
 		}
 
 		homeDir := os.Getenv("HOME") // *nix
-		if homeDir == "" {
-			// Windows
+		if homeDir == "" {           // Windows
 			homeDir = os.Getenv("USERPROFILE")
 		}
 		if homeDir == "" {

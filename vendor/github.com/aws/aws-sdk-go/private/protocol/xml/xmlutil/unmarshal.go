@@ -77,8 +77,7 @@ func parse(r reflect.Value, node *XMLNode, tag reflect.StructTag) error {
 func parseStruct(r reflect.Value, node *XMLNode, tag reflect.StructTag) error {
 	t := r.Type()
 	if r.Kind() == reflect.Ptr {
-		if r.IsNil() {
-			// create the structure if it's nil
+		if r.IsNil() { // create the structure if it's nil
 			s := reflect.New(r.Type().Elem())
 			r.Set(s)
 			r = s
@@ -111,8 +110,7 @@ func parseStruct(r reflect.Value, node *XMLNode, tag reflect.StructTag) error {
 		// try to find the field by name in elements
 		elems := node.Children[name]
 
-		if elems == nil {
-			// try to find the field in attributes
+		if elems == nil { // try to find the field in attributes
 			for _, a := range node.Attr {
 				if name == a.Name.Local {
 					// turn this into a text node for de-serializing
@@ -137,8 +135,7 @@ func parseStruct(r reflect.Value, node *XMLNode, tag reflect.StructTag) error {
 func parseList(r reflect.Value, node *XMLNode, tag reflect.StructTag) error {
 	t := r.Type()
 
-	if tag.Get("flattened") == "" {
-		// look at all item entries
+	if tag.Get("flattened") == "" { // look at all item entries
 		mname := "member"
 		if name := tag.Get("locationNameList"); name != "" {
 			mname = name
@@ -156,8 +153,7 @@ func parseList(r reflect.Value, node *XMLNode, tag reflect.StructTag) error {
 				}
 			}
 		}
-	} else {
-		// flattened list means this is a single element
+	} else { // flattened list means this is a single element
 		if r.IsNil() {
 			r.Set(reflect.MakeSlice(t, 0, 0))
 		}
@@ -180,13 +176,11 @@ func parseMap(r reflect.Value, node *XMLNode, tag reflect.StructTag) error {
 		r.Set(reflect.MakeMap(r.Type()))
 	}
 
-	if tag.Get("flattened") == "" {
-		// look at all child entries
+	if tag.Get("flattened") == "" { // look at all child entries
 		for _, entry := range node.Children["entry"] {
 			parseMapEntry(r, entry, tag)
 		}
-	} else {
-		// this element is itself an entry
+	} else { // this element is itself an entry
 		parseMapEntry(r, node, tag)
 	}
 

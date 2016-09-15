@@ -13,9 +13,7 @@ type Pos struct {
 }
 
 // IsValid returns true if the position is valid.
-func (p *Pos) IsValid() bool {
-	return p.Line > 0
-}
+func (p *Pos) IsValid() bool { return p.Line > 0 }
 
 // String returns a string in one of several forms:
 //

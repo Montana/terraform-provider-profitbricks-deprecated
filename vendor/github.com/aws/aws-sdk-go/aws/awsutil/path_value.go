@@ -31,8 +31,7 @@ func rValuesAtPath(v interface{}, path string, createPath, caseSensitive, nilTer
 		var index *int64
 		var indexStar bool
 		c := strings.TrimSpace(components[0])
-		if c == "" {
-			// no actual component, illegal syntax
+		if c == "" { // no actual component, illegal syntax
 			return nil
 		} else if caseSensitive && c != "*" && strings.ToLower(c[0:1]) == c[0:1] {
 			// TODO normalize case for user
@@ -59,8 +58,7 @@ func rValuesAtPath(v interface{}, path string, createPath, caseSensitive, nilTer
 				continue
 			}
 
-			if c == "*" {
-				// pull all members
+			if c == "*" { // pull all members
 				for i := 0; i < value.NumField(); i++ {
 					if f := reflect.Indirect(value.Field(i)); f.IsValid() {
 						nextvals = append(nextvals, f)
@@ -108,14 +106,13 @@ func rValuesAtPath(v interface{}, path string, createPath, caseSensitive, nilTer
 
 		if indexStar || index != nil {
 			nextvals = []reflect.Value{}
-			for _, value := range values {
-				value := reflect.Indirect(value)
+			for _, valItem := range values {
+				value := reflect.Indirect(valItem)
 				if value.Kind() != reflect.Slice {
 					continue
 				}
 
-				if indexStar {
-					// grab all indices
+				if indexStar { // grab all indices
 					for i := 0; i < value.Len(); i++ {
 						idx := reflect.Indirect(value.Index(i))
 						if idx.IsValid() {
@@ -127,15 +124,13 @@ func rValuesAtPath(v interface{}, path string, createPath, caseSensitive, nilTer
 
 				// pull out index
 				i := int(*index)
-				if i >= value.Len() {
-					// check out of bounds
+				if i >= value.Len() { // check out of bounds
 					if createPath {
 						// TODO resize slice
 					} else {
 						continue
 					}
-				} else if i < 0 {
-					// support negative indexing
+				} else if i < 0 { // support negative indexing
 					i = value.Len() + i
 				}
 				value = reflect.Indirect(value.Index(i))
@@ -206,8 +201,7 @@ func setValue(dstVal reflect.Value, src interface{}) {
 	}
 	srcVal := reflect.ValueOf(src)
 
-	if !srcVal.IsValid() {
-		// src is literal nil
+	if !srcVal.IsValid() { // src is literal nil
 		if dstVal.CanAddr() {
 			// Convert to pointer so that pointer's value can be nil'ed
 			//                     dstVal = dstVal.Addr()

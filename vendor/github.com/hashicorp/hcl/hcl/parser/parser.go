@@ -268,7 +268,7 @@ func (p *Parser) object() (ast.Node, error) {
 	case token.LBRACK:
 		return p.listType()
 	case token.COMMENT:
-	// implement comment
+		// implement comment
 	case token.EOF:
 		return nil, errEofToken
 	}
@@ -368,11 +368,11 @@ func (p *Parser) listType() (*ast.ListType, error) {
 			l.Add(node)
 			needComma = true
 		case token.BOOL:
-		// TODO(arslan) should we support? not supported by HCL yet
+			// TODO(arslan) should we support? not supported by HCL yet
 		case token.LBRACK:
-		// TODO(arslan) should we support nested lists? Even though it's
-		// written in README of HCL, it's not a part of the grammar
-		// (not defined in parse.y)
+			// TODO(arslan) should we support nested lists? Even though it's
+			// written in README of HCL, it's not a part of the grammar
+			// (not defined in parse.y)
 		case token.RBRACK:
 			// finished
 			l.Rbrack = p.tok.Pos
@@ -436,7 +436,7 @@ func (p *Parser) scan() token.Token {
 		if endline+1 == p.tok.Pos.Line && p.tok.Type != token.RBRACE {
 			switch p.tok.Type {
 			case token.RBRACE, token.RBRACK:
-			// Do not count for these cases
+				// Do not count for these cases
 			default:
 				// The next token is following on the line immediately after the
 				// comment group, thus the last comment group is a lead comment.
