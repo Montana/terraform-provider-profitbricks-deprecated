@@ -1,7 +1,7 @@
 
 default: build
 
-version := "v1.0.0"
+version := "v1.0.5"
 
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 name := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))

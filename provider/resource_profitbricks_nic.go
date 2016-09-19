@@ -71,6 +71,10 @@ func resourceProfitBricksNicCreate(d *schema.ResourceData, meta interface{}) err
 		ips := strings.Split(raw, ",")
 		nic.Properties.Ips = ips
 	}
+	if _, ok := d.GetOk("firewall_active"); ok {
+		raw := d.Get("firewall_active").(bool)
+		nic.Properties.FirewallActive = raw
+	}
 
 	nic = profitbricks.CreateNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), nic)
 	if nic.StatusCode > 299 {
