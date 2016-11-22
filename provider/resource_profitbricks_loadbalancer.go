@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go"
+	"strings"
 )
 
 func resourceProfitBricksLoadbalancer() *schema.Resource {
@@ -77,7 +78,18 @@ func resourceProfitBricksLoadbalancerCreate(d *schema.ResourceData, meta interfa
 }
 
 func resourceProfitBricksLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
-	lb := profitbricks.GetLoadbalancer(d.Get("datacenter_id").(string), d.Id())
+
+	dcId := d.Get("datacenter_id").(string)
+	lbId := d.Id()
+	if dcId == "" {
+		s := strings.Split(d.Id(), ";")
+		if (len(s) > 1) {
+			dcId = s[0]
+			lbId = s[1]
+		}
+	}
+
+	lb := profitbricks.GetLoadbalancer(dcId, lbId)
 
 	d.Set("name", lb.Properties.Name)
 	d.Set("ip", lb.Properties.Ip)

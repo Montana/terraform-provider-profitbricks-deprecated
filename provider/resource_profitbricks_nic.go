@@ -19,21 +19,26 @@ func resourceProfitBricksNic() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 
-			"lan": &schema.Schema{
+			"lan": {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"dhcp": &schema.Schema{
+			"dhcp": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
 			"ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"ips" : {
+				Type: schema.TypeList,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed:true,
 			},
 			"firewall_active": {
 				Type:     schema.TypeBool,
@@ -109,7 +114,7 @@ func resourceProfitBricksNicRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("dhcp", nic.Properties.Dhcp)
 	d.Set("lan", nic.Properties.Lan)
 	d.Set("name", nic.Properties.Name)
-	d.Set("ip", nic.Properties.Ips)
+	d.Set("ips", nic.Properties.Ips)
 
 	return nil
 }

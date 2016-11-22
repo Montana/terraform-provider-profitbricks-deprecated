@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go"
 	"log"
+	"strings"
 )
 
 func resourceProfitBricksVolume() *schema.Resource {
@@ -153,7 +154,16 @@ func resourceProfitBricksVolumeRead(d *schema.ResourceData, meta interface{}) er
 	getCredentials(meta)
 	dcId := d.Get("datacenter_id").(string)
 
-	volume := profitbricks.GetVolume(dcId, d.Id())
+	volumeId := d.Id()
+	if dcId == "" {
+		s := strings.Split(d.Id(), ";")
+		if (len(s) > 1) {
+			dcId = s[0]
+			volumeId = s[1]
+		}
+	}
+
+	volume := profitbricks.GetVolume(dcId, volumeId)
 	if volume.StatusCode > 299 {
 		return fmt.Errorf("An error occured while fetching a volume ID %s %s", d.Id(), volume.Response)
 

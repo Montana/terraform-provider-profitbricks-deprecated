@@ -69,6 +69,10 @@ func resourceProfitBricksServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"primary_ip": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"datacenter_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -137,6 +141,11 @@ func resourceProfitBricksServer() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"ips": {
+							Type:     schema.TypeList,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Computed: true,
+						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
 							Optional: true,
@@ -169,6 +178,11 @@ func resourceProfitBricksServer() *schema.Resource {
 									},
 									"ip": {
 										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"ips": {
+										Type:     schema.TypeList,
+										Elem:     &schema.Schema{Type: schema.TypeString},
 										Optional: true,
 									},
 									"port_range_start": {
@@ -421,8 +435,16 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) error {
 	getCredentials(meta)
 	dcId := d.Get("datacenter_id").(string)
+	serverId := d.Id()
+	if dcId == "" {
+		s := strings.Split(d.Id(), ";")
+		if (len(s) > 1) {
+			dcId = s[0]
+			serverId = s[1]
+		}
+	}
 
-	server := profitbricks.GetServer(dcId, d.Id())
+	server := profitbricks.GetServer(dcId, serverId)
 
 	primarynic := ""
 
@@ -446,6 +468,7 @@ func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) er
 	d.Set("ram", server.Properties.Ram)
 	d.Set("availability_zone", server.Properties.AvailabilityZone)
 	d.Set("primary_nic", primarynic)
+	d.Set("primary_ip", server.Entities.Nics.Items[0].Properties.Ips[0])
 
 	if server.Properties.BootVolume != nil {
 		d.Set("boot_volume", server.Properties.BootVolume.Id)
