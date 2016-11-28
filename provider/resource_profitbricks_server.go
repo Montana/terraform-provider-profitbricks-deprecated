@@ -441,6 +441,7 @@ func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) er
 		if (len(s) > 1) {
 			dcId = s[0]
 			serverId = s[1]
+			d.SetId(s[0])
 		}
 	}
 
@@ -468,7 +469,39 @@ func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) er
 	d.Set("ram", server.Properties.Ram)
 	d.Set("availability_zone", server.Properties.AvailabilityZone)
 	d.Set("primary_nic", primarynic)
-	d.Set("primary_ip", server.Entities.Nics.Items[0].Properties.Ips[0])
+
+	log.Printf("[DEBUG] dcid, srvrid", dcId, serverId)
+
+	nics := profitbricks.ListNics(dcId, serverId)
+
+
+	nic := profitbricks.GetNic(dcId, serverId, nics.Items[0].Id)
+	log.Printf("[DEBUG] ********nic********", nic)
+
+	if len(nic.Properties.Ips) > 0 {
+		d.Set("primary_ip", nic.Properties.Ips[0])
+	}
+
+	if nRaw, ok := d.GetOk("nic"); ok {
+		log.Printf("[DEBUG] parsing nic")
+
+		nicRaw := nRaw.(*schema.Set).List()
+
+		for _, raw := range nicRaw {
+
+			rawMap := raw.(map[string]interface{})
+
+			rawMap["lan"] = nic.Properties.Lan
+			rawMap["name"] = nic.Properties.Name
+			rawMap["dhcp"] = nic.Properties.Dhcp
+
+			rawMap["firewall_active"] = nic.Properties.FirewallActive
+			rawMap["ips"] = nic.Properties.Ips
+			log.Printf("[DEBUG] raw nic", rawMap)
+			log.Printf("[DEBUG] nic raw", nicRaw)
+		}
+		d.Set("nic", nicRaw)
+	}
 
 	if server.Properties.BootVolume != nil {
 		d.Set("boot_volume", server.Properties.BootVolume.Id)
@@ -624,7 +657,6 @@ func resourceProfitBricksServerDelete(d *schema.ResourceData, meta interface{}) 
 
 //Reads public key from file and returns key string iff valid
 func readPublicKey(path string) (key string, err error) {
-	log.Printf("[DEBUG] Parsing public key from file %s", path)
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
