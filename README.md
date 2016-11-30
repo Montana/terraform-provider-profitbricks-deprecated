@@ -674,6 +674,7 @@ resource "profitbricks_volume" "example" {
   disk_type = "HDD"
   sshkey_path = "${var.private_key_path}"
   bus = "VIRTIO"
+  availablity_zone = "ZONE_1"
 }
 ```
 
@@ -691,6 +692,7 @@ resource "profitbricks_volume" "example" {
 | image_name | Yes* | string | The image or snapshot UUID. It is required if `licence_type` is not provided. |
 | licence_type | Yes* |string | Required if `image_name` is not provided. ["LINUX", "WINDOWS", or "OTHER"] |
 | name | No | string | A name for the storage volume. |
+| availability_zone | No | string | Availability Zone for the storage. ["AUTO", "ZONE_1", "ZONE_2"] |
 
 \* See the *Description* column for details.
 
@@ -719,6 +721,7 @@ resource "profitbricks_nic" "example" {
 | dhcp| No| boolean | If the NIC should get an IP using DHCP. |
 | ip | No | string | IPs assigned to the NIC. Value to be passed in form of a comma separated string "192.168.1.1,192.168.1.2" |
 | firewall_active | No | boolean | If this resource is set to `true` and is nested under a server resource firewall, with open SSH port, resource must be nested under the NIC. |
+| nat | No | boolean | Network Address Translation |
 
 \* See the *Description* column for details.
 

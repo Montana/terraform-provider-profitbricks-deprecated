@@ -36,7 +36,7 @@ resource "profitbricks_server" "webserver" {
     size           = 5
     disk_type      = "SSD"
     ssh_key_path   = ["${var.ssh_keys}"]
-    image_password = "test1234"
+    availability_zone = "AUTO"
   }
 
   nic {
@@ -75,6 +75,7 @@ resource "profitbricks_nic" "webserver_nic" {
   lan             = 2
   dhcp            = true
   firewall_active = true
+  nat = false
 }
 
 resource "profitbricks_firewall" "webserver_ping" {
@@ -128,6 +129,7 @@ resource "profitbricks_server" "database" {
     disk_type      = "HDD"
     ssh_key_path   = ["${var.ssh_keys}"]
     image_password = "test1234"
+    availability_zone = "ZONE_1"
   }
 
   nic {

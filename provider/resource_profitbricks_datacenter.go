@@ -162,6 +162,7 @@ func getCredentials(meta interface{}) (username, password string, timeout int) {
 
 	profitbricks.SetAuth(username, password)
 	profitbricks.SetEndpoint(endpoint)
+	profitbricks.SetUserAgent(profitbricks.AgentHeader + " terraform-provider-profitbricks/1.1.0")
 	profitbricks.SetDepth("5")
 	return username, password, timeout
 }
