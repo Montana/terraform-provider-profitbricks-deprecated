@@ -116,6 +116,10 @@ func resourceProfitBricksServer() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"availability_zone": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -145,6 +149,10 @@ func resourceProfitBricksServer() *schema.Resource {
 							Type:     schema.TypeList,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 							Computed: true,
+						},
+						"nat" :{
+							Type: schema.TypeBool,
+							Optional: true,
 						},
 						"firewall_active": {
 							Type:     schema.TypeBool,
@@ -252,7 +260,7 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 			var imagePassword string
 			//Can be one file or a list of files
 			var sshkey_path []interface{}
-			var image, licenceType string
+			var image, licenceType, availabilityZone string
 
 			if rawMap["image_name"] != nil {
 				image = getImageId(d.Get("datacenter_id").(string), rawMap["image_name"].(string), rawMap["disk_type"].(string))
@@ -288,7 +296,9 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 					publicKeys = append(publicKeys, publicKey)
 				}
 			}
-
+			if rawMap["availability_zone"] != nil {
+				availabilityZone = rawMap["availability_zone"].(string)
+			}
 			if image == "" && licenceType == "" {
 				return fmt.Errorf("Either 'image', or 'licenceType' must be set.")
 			}
@@ -296,7 +306,7 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 			request.Entities = &profitbricks.ServerEntities{
 				Volumes: &profitbricks.Volumes{
 					Items: []profitbricks.Volume{
-						profitbricks.Volume{
+						{
 							Properties: profitbricks.VolumeProperties{
 								Name:          rawMap["name"].(string),
 								Size:          rawMap["size"].(int),
@@ -305,6 +315,7 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 								Image:         image,
 								Bus:           rawMap["bus"].(string),
 								LicenceType:   licenceType,
+								AvailabilityZone: availabilityZone,
 							},
 						},
 					},
@@ -344,6 +355,9 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 				if rawIps != "" {
 					nic.Properties.Ips = ips
 				}
+			}
+			if rawMap["nat"] != nil {
+				nic.Properties.Nat = rawMap["nat"].(bool)
 			}
 			request.Entities.Nics = &profitbricks.Nics{
 				Items: []profitbricks.Nic{
@@ -474,7 +488,6 @@ func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) er
 
 	nics := profitbricks.ListNics(dcId, serverId)
 
-
 	nic := profitbricks.GetNic(dcId, serverId, nics.Items[0].Id)
 	log.Printf("[DEBUG] ********nic********", nic)
 
@@ -494,7 +507,7 @@ func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) er
 			rawMap["lan"] = nic.Properties.Lan
 			rawMap["name"] = nic.Properties.Name
 			rawMap["dhcp"] = nic.Properties.Dhcp
-
+			rawMap["nat"] = nic.Properties.Nat
 			rawMap["firewall_active"] = nic.Properties.FirewallActive
 			rawMap["ips"] = nic.Properties.Ips
 			log.Printf("[DEBUG] raw nic", rawMap)
@@ -605,6 +618,9 @@ func resourceProfitBricksServerUpdate(d *schema.ResourceData, meta interface{}) 
 			}
 			if rawMap["dhcp"] != nil {
 				properties.Dhcp = rawMap["dhcp"].(bool)
+			}
+			if rawMap["nat"] != nil {
+				properties.Nat = rawMap["nat"].(bool)
 			}
 		}
 

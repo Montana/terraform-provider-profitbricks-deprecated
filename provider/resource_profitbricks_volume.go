@@ -1,7 +1,6 @@
 package profitbricks
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go"
@@ -54,6 +53,10 @@ func resourceProfitBricksVolume() *schema.Resource {
 				Optional: true,
 			},
 			"name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"availability_zone": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -123,8 +126,11 @@ func resourceProfitBricksVolumeCreate(d *schema.ResourceData, meta interface{}) 
 	} else {
 		volume.Properties.SshKeys = nil
 	}
-	jsn, _ := json.Marshal(volume)
-	log.Printf("[INFO] volume: %s", string(jsn))
+
+	if _, ok := d.GetOk("availability_zone"); ok {
+		raw := d.Get("availability_zone").(string)
+		volume.Properties.AvailabilityZone = raw
+	}
 
 	volume = profitbricks.CreateVolume(dcId, volume)
 
@@ -199,6 +205,10 @@ func resourceProfitBricksVolumeUpdate(d *schema.ResourceData, meta interface{}) 
 	if d.HasChange("bus") {
 		_, newValue := d.GetChange("bus")
 		properties.Bus = newValue.(string)
+	}
+	if d.HasChange("availability_zone") {
+		_, newValue := d.GetChange("availability_zone")
+		properties.AvailabilityZone = newValue.(string)
 	}
 
 	volume := profitbricks.PatchVolume(dcId, d.Id(), properties)

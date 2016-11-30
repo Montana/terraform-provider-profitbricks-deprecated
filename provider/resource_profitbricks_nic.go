@@ -44,6 +44,10 @@ func resourceProfitBricksNic() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"nat" :{
+				Type: schema.TypeBool,
+				Optional: true,
+			},
 			"server_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -79,6 +83,10 @@ func resourceProfitBricksNicCreate(d *schema.ResourceData, meta interface{}) err
 	if _, ok := d.GetOk("firewall_active"); ok {
 		raw := d.Get("firewall_active").(bool)
 		nic.Properties.FirewallActive = raw
+	}
+	if _, ok := d.GetOk("nat"); ok {
+		raw := d.Get("nat").(bool)
+		nic.Properties.Nat = raw
 	}
 
 	nic = profitbricks.CreateNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), nic)
@@ -141,6 +149,11 @@ func resourceProfitBricksNicUpdate(d *schema.ResourceData, meta interface{}) err
 		_, raw := d.GetChange("ip")
 		ips := strings.Split(raw.(string), ",")
 		properties.Ips = ips
+	}
+	if d.HasChange("nat") {
+		_, raw := d.GetChange("nat")
+		nat := raw.(bool)
+		properties.Nat = nat
 	}
 
 	nic := profitbricks.PatchNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id(), properties)
