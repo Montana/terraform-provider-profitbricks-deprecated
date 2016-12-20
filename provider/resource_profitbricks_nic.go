@@ -61,7 +61,8 @@ func resourceProfitBricksNic() *schema.Resource {
 }
 
 func resourceProfitBricksNicCreate(d *schema.ResourceData, meta interface{}) error {
-	getCredentials(meta)
+	config := meta.(*Config)
+	profitbricks.SetAuth(config.Username, config.Password)
 
 	nic := profitbricks.Nic{
 		Properties: profitbricks.NicProperties{
@@ -112,7 +113,8 @@ func resourceProfitBricksNicCreate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceProfitBricksNicRead(d *schema.ResourceData, meta interface{}) error {
-	getCredentials(meta)
+	config := meta.(*Config)
+	profitbricks.SetAuth(config.Username, config.Password)
 
 	nic := profitbricks.GetNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id())
 	if nic.StatusCode > 299 {
@@ -128,7 +130,8 @@ func resourceProfitBricksNicRead(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceProfitBricksNicUpdate(d *schema.ResourceData, meta interface{}) error {
-	getCredentials(meta)
+	config := meta.(*Config)
+	profitbricks.SetAuth(config.Username, config.Password)
 
 	properties := profitbricks.NicProperties{}
 
@@ -169,7 +172,9 @@ func resourceProfitBricksNicUpdate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceProfitBricksNicDelete(d *schema.ResourceData, meta interface{}) error {
-	getCredentials(meta)
+	config := meta.(*Config)
+	profitbricks.SetAuth(config.Username, config.Password)
+
 	resp := profitbricks.DeleteNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id())
 	err := waitTillProvisioned(meta, resp.Headers.Get("Location"))
 	if err != nil {

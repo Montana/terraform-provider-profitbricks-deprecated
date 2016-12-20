@@ -6,7 +6,6 @@ import (
 	"github.com/profitbricks/profitbricks-sdk-go"
 	"log"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -42,7 +41,8 @@ func resourceProfitBricksDatacenter() *schema.Resource {
 }
 
 func resourceProfitBricksDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
-	getCredentials(meta)
+	config := meta.(*Config)
+	profitbricks.SetAuth(config.Username, config.Password)
 
 	datacenter := profitbricks.Datacenter{
 		Properties: profitbricks.DatacenterProperties{
@@ -72,7 +72,8 @@ func resourceProfitBricksDatacenterCreate(d *schema.ResourceData, meta interface
 }
 
 func resourceProfitBricksDatacenterRead(d *schema.ResourceData, meta interface{}) error {
-	getCredentials(meta)
+	config := meta.(*Config)
+	profitbricks.SetAuth(config.Username, config.Password)
 	datacenter := profitbricks.GetDatacenter(d.Id())
 	if datacenter.StatusCode > 299 {
 		return fmt.Errorf("Error while fetching a data center ID %s %s", d.Id(), datacenter.Response)
@@ -85,7 +86,8 @@ func resourceProfitBricksDatacenterRead(d *schema.ResourceData, meta interface{}
 }
 
 func resourceProfitBricksDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
-	getCredentials(meta)
+	config := meta.(*Config)
+	profitbricks.SetAuth(config.Username, config.Password)
 
 	obj := profitbricks.DatacenterProperties{}
 
@@ -106,7 +108,8 @@ func resourceProfitBricksDatacenterUpdate(d *schema.ResourceData, meta interface
 }
 
 func resourceProfitBricksDatacenterDelete(d *schema.ResourceData, meta interface{}) error {
-	getCredentials(meta)
+	config := meta.(*Config)
+	profitbricks.SetAuth(config.Username, config.Password)
 
 	dcid := d.Id()
 	resp := profitbricks.DeleteDatacenter(dcid)
@@ -123,12 +126,13 @@ func resourceProfitBricksDatacenterDelete(d *schema.ResourceData, meta interface
 }
 
 func waitTillProvisioned(meta interface{}, path string) error {
-	_, _, timeout := getCredentials(meta)
+	config := meta.(*Config)
+	profitbricks.SetAuth(config.Username, config.Password)
 	//log.Printf("[DEBUG] Request status path: %s", path)
 	waitCount := 50
 
-	if timeout != 0 {
-		waitCount = timeout
+	if config.Timeout != 0 {
+		waitCount = config.Timeout
 	}
 	for i := 0; i < waitCount; i++ {
 		request := profitbricks.GetRequestStatus(path)
@@ -151,20 +155,6 @@ func waitTillProvisioned(meta interface{}, path string) error {
 		i++
 	}
 	return fmt.Errorf("Timeout has expired")
-}
-
-func getCredentials(meta interface{}) (username, password string, timeout int) {
-	creds := meta.(string)
-
-	splitv := strings.Split(creds, ",")
-	username, password, to, endpoint := splitv[0], splitv[1], splitv[2], splitv[3]
-	timeout, _ = strconv.Atoi(to)
-
-	profitbricks.SetAuth(username, password)
-	profitbricks.SetEndpoint(endpoint)
-	profitbricks.SetUserAgent(profitbricks.AgentHeader + " terraform-provider-profitbricks/1.1.0")
-	profitbricks.SetDepth("5")
-	return username, password, timeout
 }
 
 func getImageId(dcId string, imageName string, imageType string) string {

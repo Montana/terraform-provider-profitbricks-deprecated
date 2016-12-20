@@ -1,7 +1,7 @@
 
 default: build
 
-version := "v1.1.0"
+version := "v1.1.1"
 
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 name := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
@@ -34,7 +34,7 @@ release:
 	tar -cvzf $(name)-$(version)-darwin-amd64.tar.gz -C . $(name)
 
 	GOOS=windows GOARCH=amd64 GOGC=off CGOENABLED=0 godep go build
-	tar -cvzf $(name)-$(version)-windows-amd64.tar.gz -C . $(name).exe
+	zip  $(name)-$(version)-windows-amd64.zip $(name).exe
 
 
 install: compile
