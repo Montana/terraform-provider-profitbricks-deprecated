@@ -2,16 +2,27 @@ provider "profitbricks" {
   timeout = 100
 }
 
-data "profitbricks_datacenter" "test"{
+data "profitbricks_datacenter" "test" {
   name = "tes"
-  location = "us/las"
+  location = "${data.profitbricks_location.test1.id}"
+}
+
+data "profitbricks_location" "test1" {
+  name = "karl"
+  feature = "SSD"
+}
+
+resource "profitbricks_datacenter" "main1" {
+  name = "datacenter 01"
+  location = "${data.profitbricks_location.test1.id}"
+  description = "description of the datacenter"
 }
 
 //Public lan
 resource "profitbricks_lan" "webserver_lan" {
   datacenter_id = "${data.profitbricks_datacenter.test.id}"
-  public        = true
-  name          = "public"
+  public = true
+  name = "public"
 }
 //
 ////IP Block

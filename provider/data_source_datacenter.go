@@ -14,7 +14,7 @@ func dataSourceDataCenter() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"location": {
 				Type:     schema.TypeString,
@@ -38,25 +38,15 @@ func dataSourceDataCenterRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("An error occured while fetching datacenters %s", datacenters.Response)
 	}
 
-	name, nameOk := d.GetOk("name")
+	name, _ := d.GetOk("name")
 	location, locationOk := d.GetOk("location")
 
-	if !nameOk && !locationOk {
-		return fmt.Errorf("One of name or location must be assigned")
-
-	}
-
 	results := []profitbricks.Datacenter{}
-	if nameOk {
-		log.Printf("[INFO] searching dcs by name***********")
 
-		for _, dc := range datacenters.Items {
-			if dc.Properties.Name == name.(string) || strings.Contains(dc.Properties.Name, name.(string)) {
-				results = append(results, dc)
-			}
+	for _, dc := range datacenters.Items {
+		if dc.Properties.Name == name.(string) || strings.Contains(dc.Properties.Name, name.(string)) {
+			results = append(results, dc)
 		}
-	} else {
-		results = datacenters.Items
 	}
 
 	if locationOk {
