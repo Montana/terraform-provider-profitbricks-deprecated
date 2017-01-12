@@ -12,6 +12,13 @@ data "profitbricks_location" "test1" {
   feature = "SSD"
 }
 
+data "profitbricks_image" "test_img" {
+  name = "Ubuntu"
+  type = "HDD"
+  version = "14"
+  location = "${data.profitbricks_location.test1.id}"
+}
+
 resource "profitbricks_datacenter" "main1" {
   name = "datacenter 01"
   location = "${data.profitbricks_location.test1.id}"
@@ -25,12 +32,12 @@ resource "profitbricks_lan" "webserver_lan" {
   name = "public"
 }
 //
-////IP Block
-//resource "profitbricks_ipblock" "webserver_ip" {
-//  location = "${profitbricks_datacenter.main.location}"
-//  size     = 1
-//}
-//
+//IP Block
+resource "profitbricks_ipblock" "webserver_ip" {
+  location = "${data.profitbricks_location.test1.id}"
+  size = 1
+}
+
 ////Web Server
 //resource "profitbricks_datacenter" "main" {
 //  name        = "datacenter 01"
@@ -38,37 +45,38 @@ resource "profitbricks_lan" "webserver_lan" {
 //  description = "description of the datacenter"
 //}
 //
-//resource "profitbricks_server" "webserver" {
-//  name              = "webserver"
-//  datacenter_id     = "${profitbricks_datacenter.main.id}"
-//  cores             = 1
-//  ram               = 1024
-//  availability_zone = "ZONE_1"
-//  cpu_family        = "AMD_OPTERON"
-//
-//  volume {
-//    name           = "system"
-//    image_name     = "${var.ubuntu}"
-//    size           = 5
-//    disk_type      = "SSD"
-//    ssh_key_path   = ["${var.ssh_keys}"]
-//    availability_zone = "AUTO"
-//  }
-//
-//  nic {
-//    lan             = "${profitbricks_lan.webserver_lan.id}"
-//    dhcp            = true
-//    ip              = "${profitbricks_ipblock.webserver_ip.0.ips}"
-//    firewall_active = true
-//
+resource "profitbricks_server" "webserver" {
+  name = "webserver"
+  datacenter_id = "${data.profitbricks_datacenter.test.id}"
+  cores = 1
+  ram = 1024
+  availability_zone = "ZONE_1"
+  cpu_family = "AMD_OPTERON"
+
+  volume {
+    name = "system"
+    image_name = "${data.profitbricks_image.test_img.id}"
+    size = 5
+    disk_type = "SSD"
+    ssh_key_path = [
+      "${var.ssh_keys}"]
+    availability_zone = "AUTO"
+  }
+
+  nic {
+    lan = "${profitbricks_lan.webserver_lan.id}"
+    dhcp = true
+    ip = "${profitbricks_ipblock.webserver_ip.0.ips}"
+    //firewall_active = true
+
 //    firewall {
-//      protocol         = "TCP"
-//      name             = "SSH"
+//      protocol = "TCP"
+//      name = "SSH"
 //      port_range_start = 22
-//      port_range_end   = 22
+//      port_range_end = 22
 //    }
-//  }
-//
+  }
+
 //  provisioner "remote-exec" {
 //    inline = [
 //      "apt-get update",
@@ -77,13 +85,13 @@ resource "profitbricks_lan" "webserver_lan" {
 //
 //    # install nginx
 //    connection {
-//      type        = "ssh"
+//      type = "ssh"
 //      private_key = "${file("${var.private_key_path}")}"
-//      user        = "root"
-//      timeout     = "4m"
+//      user = "root"
+//      timeout = "4m"
 //    }
 //  }
-//}
+}
 //
 //resource "profitbricks_nic" "webserver_nic" {
 //  datacenter_id   = "${profitbricks_datacenter.main.id}"

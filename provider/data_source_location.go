@@ -68,7 +68,11 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 
 	if len(results) > 1 {
 		log.Printf("[INFO] Results length greater than 1")
-		return fmt.Errorf("There are more than 1 location with provided search criteria")
+		return fmt.Errorf("There is more than one location that match the search criteria")
+	}
+
+	if len(results) == 0 {
+		return fmt.Errorf("There are no locations that match the search criteria")
 	}
 
 	d.SetId(results[0].Id)

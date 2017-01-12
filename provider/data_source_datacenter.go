@@ -63,7 +63,11 @@ func dataSourceDataCenterRead(d *schema.ResourceData, meta interface{}) error {
 
 	if len(results) > 1 {
 		log.Printf("[INFO] Results length greater than 1")
-		return fmt.Errorf("There are more than 1 datacenters with provided search criteria")
+		return fmt.Errorf("There is more than one datacenters that match the search criteria")
+	}
+
+	if len(results) == 0 {
+		return fmt.Errorf("There are no datacenters that match the search criteria")
 	}
 
 	d.SetId(results[0].Id)
