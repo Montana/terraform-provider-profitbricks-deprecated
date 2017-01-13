@@ -83,3 +83,11 @@ resource "profitbricks_server" "webserver" {
     }
   }
 }
+
+output "server_id"{
+  value = "${profitbricks_server.webserver.id}"
+}
+
+output "datacenter_id"{
+  value = "${profitbricks_datacenter.main.id}"
+}

@@ -69,28 +69,28 @@ resource "profitbricks_server" "webserver" {
     ip = "${profitbricks_ipblock.webserver_ip.0.ips}"
     //firewall_active = true
 
-//    firewall {
-//      protocol = "TCP"
-//      name = "SSH"
-//      port_range_start = 22
-//      port_range_end = 22
-//    }
-  }
+    firewall {
+      protocol = "TCP"
+      name = "SSH"
+      port_range_start = 22
+      port_range_end = 22
+    }
+}
 
-//  provisioner "remote-exec" {
-//    inline = [
-//      "apt-get update",
-//      "apt-get -y install nginx",
-//    ]
-//
-//    # install nginx
-//    connection {
-//      type = "ssh"
-//      private_key = "${file("${var.private_key_path}")}"
-//      user = "root"
-//      timeout = "4m"
-//    }
-//  }
+  provisioner "remote-exec" {
+    inline = [
+      "apt-get update",
+      "apt-get -y install nginx",
+    ]
+
+    # install nginx
+    connection {
+      type = "ssh"
+      private_key = "${file("${var.private_key_path}")}"
+      user = "root"
+      timeout = "4m"
+    }
+  }
 }
 //
 //resource "profitbricks_nic" "webserver_nic" {

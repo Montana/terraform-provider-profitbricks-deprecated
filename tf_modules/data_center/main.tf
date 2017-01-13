@@ -11,3 +11,11 @@ resource "profitbricks_lan" "lan" {
   public = true
   name = "public"
 }
+
+output "datacenter_id"{
+  value = "${profitbricks_datacenter.main.id}"
+}
+
+output "lan_id"{
+  value = "${profitbricks_lan.lan.id}"
+}
