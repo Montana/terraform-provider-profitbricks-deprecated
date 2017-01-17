@@ -881,7 +881,7 @@ data "profitbricks_image" "image_example" {
 
 If both 'name' and 'version' are provided the plugin will concatenate two strings in this format *[name]-[version]*. 
 
-\* See [Example](https://github.com/ProfitBricks/terraform-provider-profitbricks/tree/master/example/main.tf#L10-15) 
+\* See [Example](https://github.com/ProfitBricks/terraform-provider-profitbricks/tree/master/example/main.tf#L10-L15) 
 
 ### Locations Data Source
 
@@ -901,7 +901,7 @@ data "profitbricks_location" "test1" {
 | name | Yes | string | Name of part of the name. |
 | feature | No  | string | Feature name.  |
 
-\* See [Example](https://github.com/ProfitBricks/terraform-provider-profitbricks/tree/master/example/main.tf#5-8) 
+\* See [Example](https://github.com/ProfitBricks/terraform-provider-profitbricks/tree/master/example/main.tf#L5-L8) 
 
 ## Support
 
