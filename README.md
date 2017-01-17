@@ -18,7 +18,9 @@
   * [Firewall Rule](#firewall-rule)
   * [Load Balancer](#load-balancer)
 * [ProfitBricks Data Sources](#profitbricks-data-sources)
-
+  * [Data Centers Data Source](#data-centers-data-source)
+  * [Images Data Source](#images-data-source)
+  * [Locations Data Source](#locations-data-source)
 * [Support](#support)
 
 ## Introduction
@@ -881,7 +883,7 @@ If both 'name' and 'version' are provided the plugin will concatenate two string
 
 \* See [Example](https://github.com/ProfitBricks/terraform-provider-profitbricks/tree/master/example/main.tf#L10-15) 
 
-### Locations Center Data Source
+### Locations Data Source
 
 #### Example Syntax
 
