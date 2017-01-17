@@ -17,6 +17,10 @@
   * [LAN](#lan)
   * [Firewall Rule](#firewall-rule)
   * [Load Balancer](#load-balancer)
+* [ProfitBricks Data Sources](#profitbricks-data-sources)
+  * [Data Centers Data Source](#data-centers-data-source)
+  * [Images Data Source](#images-data-source)
+  * [Locations Data Source](#locations-data-source)
 * [Support](#support)
 
 ## Introduction
@@ -827,6 +831,77 @@ resource "profitbricks_loadbalancer" "example" {
 \* See the *Description* column for details.
 
 **Please Note:** Due to a known issue with ProfitBricks Cloud API, the Terraform ProfitBricks Provider does not currently support creating Load Balancer objects. This should be resolved in the near future.
+
+## ProfitBricks Data Sources
+
+This section describes the various ProfitBricks data sources which allow ProfitBricks data to be fetched and used elsewhere in Terraform configuration.
+
+### Data Centers Data Source
+
+#### Example Syntax
+
+```
+data "profitbricks_datacenter" "dc_example" {
+  name = "test_name"
+  location = "location_id"
+}
+```
+
+#### Argument Reference
+
+| Parameter | Required | Type | Description |
+|---|---|---|---|
+| name | Yes* | string | Name of part of the name. |
+| location | no  | string | Id of the location |
+
+If both parameters are provided the data source will use both to filter out the results.  
+
+
+### Images Data Source
+
+#### Example Syntax
+
+```
+data "profitbricks_image" "image_example" {
+  name = "Ubuntu"
+  type = "HDD"
+  version = "14"
+  location = "location_id"
+}
+```
+
+#### Argument Reference
+
+| Parameter | Required | Type | Description |
+|---|---|---|---|
+| name | Yes | string | Name of part of the name. |
+| version | No | string | Version of the image (see details below). |
+| location | No  | string | Id of the location |
+| type | No  | string | Image type. |
+
+If both 'name' and 'version' are provided the plugin will concatenate two strings in this format *[name]-[version]*. 
+
+\* See [Example](https://github.com/ProfitBricks/terraform-provider-profitbricks/tree/master/example/main.tf#L10-15) 
+
+### Locations Data Source
+
+#### Example Syntax
+
+```
+data "profitbricks_location" "test1" {
+  name = "karlsruhe"
+  feature = "SSD"
+}
+```
+
+#### Argument Reference
+
+| Parameter | Required | Type | Description |
+|---|---|---|---|
+| name | Yes | string | Name of part of the name. |
+| feature | No  | string | Feature name.  |
+
+\* See [Example](https://github.com/ProfitBricks/terraform-provider-profitbricks/tree/master/example/main.tf#5-8) 
 
 ## Support
 
