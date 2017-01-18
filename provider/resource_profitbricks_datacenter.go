@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"strings"
 	"time"
-	"regexp"
 )
 
 func resourceProfitBricksDatacenter() *schema.Resource {
@@ -17,6 +16,9 @@ func resourceProfitBricksDatacenter() *schema.Resource {
 		Read:   resourceProfitBricksDatacenterRead,
 		Update: resourceProfitBricksDatacenterUpdate,
 		Delete: resourceProfitBricksDatacenterDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 
 			//Datacenter parameters
@@ -179,15 +181,10 @@ func getImageId(dcId string, imageName string, imageType string) string {
 			if imageType == "SSD" {
 				imageType = "HDD"
 			}
-			if (imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && i.Properties.ImageType == imageType && i.Properties.Location == dc.Properties.Location && i.Properties.Public == true) {
+			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && i.Properties.ImageType == imageType && i.Properties.Location == dc.Properties.Location && i.Properties.Public == true {
 				return i.Id
 			}
 		}
 	}
 	return ""
-}
-
-func IsValidUUID(uuid string) bool {
-	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
-	return r.MatchString(uuid)
 }

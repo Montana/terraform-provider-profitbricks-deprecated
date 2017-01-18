@@ -14,6 +14,9 @@ func resourceProfitBricksVolume() *schema.Resource {
 		Read:   resourceProfitBricksVolumeRead,
 		Update: resourceProfitBricksVolumeUpdate,
 		Delete: resourceProfitBricksVolumeDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			"image_name": {
 				Type:     schema.TypeString,
@@ -104,13 +107,7 @@ func resourceProfitBricksVolumeCreate(d *schema.ResourceData, meta interface{}) 
 			publicKeys = append(publicKeys, publicKey)
 		}
 	}
-
-	var image string
-	if !IsValidUUID(image_name) {
-		image = getImageId(d.Get("datacenter_id").(string), image_name, d.Get("disk_type").(string))
-	} else {
-		image = image_name
-	}
+	image := getImageId(d.Get("datacenter_id").(string), image_name, d.Get("disk_type").(string))
 
 	volume := profitbricks.Volume{
 		Properties: profitbricks.VolumeProperties{

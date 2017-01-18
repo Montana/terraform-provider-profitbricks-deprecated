@@ -44,11 +44,7 @@ func Provider() terraform.ResourceProvider {
 			"profitbricks_server":       resourceProfitBricksServer(),
 			"profitbricks_volume":       resourceProfitBricksVolume(),
 		},
-		DataSourcesMap: map[string]*schema.Resource{
-			"profitbricks_datacenter" : dataSourceDataCenter(),
-			"profitbricks_location" : dataSourceLocation(),
-			"profitbricks_image" : dataSourceImage(),
-		},
+
 		ConfigureFunc: providerConfigure,
 	}
 }
