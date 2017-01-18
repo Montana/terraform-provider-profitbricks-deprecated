@@ -32,3 +32,4 @@ _testmain.go
 /terraform.tfstate.backup
 /example/terraform.tfstate.backup
 /example/terraform.tfstate
+/.DS_Store

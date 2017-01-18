@@ -2,56 +2,68 @@ provider "profitbricks" {
   timeout = 100
 }
 
+data "profitbricks_location" "loc" {
+  name = "karl"
+  feature = "SSD"
+}
+
+data "profitbricks_image" "test_img" {
+  name = "Ubuntu"
+  type = "HDD"
+  version = "14"
+  location = "${data.profitbricks_location.loc.id}"
+}
+
+resource "profitbricks_datacenter" "main" {
+  name = "datacenter 01"
+  location = "${data.profitbricks_location.loc.id}"
+  description = "description of the datacenter"
+}
+
 //Public lan
 resource "profitbricks_lan" "webserver_lan" {
   datacenter_id = "${profitbricks_datacenter.main.id}"
-  public        = true
-  name          = "public"
+  public = true
+  name = "public"
 }
 
 //IP Block
 resource "profitbricks_ipblock" "webserver_ip" {
-  location = "${profitbricks_datacenter.main.location}"
-  size     = 1
-}
-
-//Web Server
-resource "profitbricks_datacenter" "main" {
-  name        = "datacenter 01"
-  location    = "us/las"
-  description = "description of the datacenter"
+  location = "${data.profitbricks_location.loc.id}"
+  size = 1
 }
 
 resource "profitbricks_server" "webserver" {
-  name              = "webserver"
-  datacenter_id     = "${profitbricks_datacenter.main.id}"
-  cores             = 1
-  ram               = 1024
+  name = "webserver"
+  datacenter_id = "${profitbricks_datacenter.main.id}"
+  cores = 1
+  ram = 1024
   availability_zone = "ZONE_1"
-  cpu_family        = "AMD_OPTERON"
+  cpu_family = "AMD_OPTERON"
 
   volume {
-    name           = "system"
-    image_name     = "${var.ubuntu}"
-    size           = 5
-    disk_type      = "SSD"
-    ssh_key_path   = ["${var.ssh_keys}"]
+    name = "system"
+    image_name = "${data.profitbricks_image.test_img.id}"
+    size = 5
+    disk_type = "SSD"
+    ssh_key_path = [
+      "${var.ssh_keys}"]
     availability_zone = "AUTO"
   }
 
   nic {
-    lan             = "${profitbricks_lan.webserver_lan.id}"
-    dhcp            = true
-    ip              = "${profitbricks_ipblock.webserver_ip.0.ips}"
-    firewall_active = true
+    lan = "${profitbricks_lan.webserver_lan.id}"
+    dhcp = true
+    ip = "${profitbricks_ipblock.webserver_ip.0.ips}"
+    //firewall_active = true
 
     firewall {
-      protocol         = "TCP"
-      name             = "SSH"
+      protocol = "TCP"
+      name = "SSH"
       port_range_start = 22
-      port_range_end   = 22
+      port_range_end = 22
     }
-  }
+}
 
   provisioner "remote-exec" {
     inline = [
@@ -61,10 +73,10 @@ resource "profitbricks_server" "webserver" {
 
     # install nginx
     connection {
-      type        = "ssh"
+      type = "ssh"
       private_key = "${file("${var.private_key_path}")}"
-      user        = "root"
-      timeout     = "4m"
+      user = "root"
+      timeout = "4m"
     }
   }
 }

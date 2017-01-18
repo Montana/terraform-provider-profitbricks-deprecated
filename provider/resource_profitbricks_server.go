@@ -21,9 +21,6 @@ func resourceProfitBricksServer() *schema.Resource {
 		Read:   resourceProfitBricksServerRead,
 		Update: resourceProfitBricksServerUpdate,
 		Delete: resourceProfitBricksServerDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 		Schema: map[string]*schema.Schema{
 
 			//Server parameters
@@ -265,11 +262,15 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 			var image, licenceType, availabilityZone string
 
 			if rawMap["image_name"] != nil {
-				image = getImageId(d.Get("datacenter_id").(string), rawMap["image_name"].(string), rawMap["disk_type"].(string))
-				if image == "" {
-					dc := profitbricks.GetDatacenter(d.Get("datacenter_id").(string))
-					return fmt.Errorf("Image '%s' doesn't exist. in location %s", rawMap["image_name"], dc.Properties.Location)
+				if !IsValidUUID(rawMap["image_name"].(string)) {
+					image = getImageId(d.Get("datacenter_id").(string), rawMap["image_name"].(string), rawMap["disk_type"].(string))
+					if image == "" {
+						dc := profitbricks.GetDatacenter(d.Get("datacenter_id").(string))
+						return fmt.Errorf("Image '%s' doesn't exist. in location %s", rawMap["image_name"], dc.Properties.Location)
 
+					}
+				} else {
+					image = rawMap["image_name"].(string)
 				}
 			}
 			if rawMap["licence_type"] != nil {
