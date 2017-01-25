@@ -14,19 +14,19 @@ func Provider() terraform.ResourceProvider {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("PROFITBRICKS_USERNAME", nil),
-				Description: "Profitbricks username for API operations.",
+				Description: "ProfitBricks username for API operations.",
 			},
 			"password": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("PROFITBRICKS_PASSWORD", nil),
-				Description: "Profitbricks password for API operations.",
+				Description: "ProfitBricks password for API operations.",
 			},
 			"endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("PROFITBRICKS_API_URL", profitbricks.Endpoint),
-				Description: "Profitbricks REST API URL.",
+				Description: "ProfitBricks REST API URL.",
 			},
 			"timeout": {
 				Type:     schema.TypeInt,
