@@ -686,7 +686,7 @@ resource "profitbricks_volume" "example" {
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| datacenter_id | Yes* | string | UUID of an existing Virtual Data Center resource. This parameters is not required if used under Server resource. |
 | server_id | Yes* | string | UUID of an existing server resource. This parameters is not required if used under Server resource. |
 | disk_type | Yes | string | The storage volume type. ["HDD", or "SSD"] |
 | bus | Yes | string | The bus type of the storage volume. ["VIRTIO", or "IDE"] |
@@ -718,7 +718,7 @@ resource "profitbricks_nic" "example" {
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| datacenter_id | Yes* | string | UUID of an existing Virtual Data Center resource. This parameters is not required if used under Server resource. |
 | server_id | Yes*  | string | UUID of an existing server resource. This parameters is not required if used under Server resource. |
 | lan | Yes | integer | The LAN ID the NIC will sit on. |
 | name| No | string |  The name of the LAN. |
@@ -763,7 +763,7 @@ resource "profitbricks_lan" "example" {
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| datacenter_id | Yes* | string | UUID of an existing Virtual Data Center resource. This parameters is not required if used under Server resource. |
 | name | No | string | The name of the LAN |
 | public | No | boolean | Indicates if the LAN faces the public Internet or is "private". |
 
@@ -791,7 +791,7 @@ resource "profitbricks_firewall" "example" {
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| datacenter_id | Yes* | string | UUID of an existing Virtual Data Center resource. This parameters is not required if used under Server resource. |
 | server_id | Yes*  | string | UUID of an existing server resource. This parameters is not required if used under Server resource. |
 | nic_id | Yes*  | string | UUID of an existing server resource. This parameters is not required if used under Server resource. |
 | protocol | Yes | string | The protocol for the rule: TCP, UDP, ICMP, ANY. |
@@ -801,8 +801,8 @@ resource "profitbricks_firewall" "example" {
 | target_ip | No | string | Only traffic directed to the respective IP address of the NIC is allowed. |
 | port_range_start | No  | string | Defines the start range of the allowed port (from 1 to 65534) if protocol TCP or UDP is chosen. |
 | port_range_end | No | string | Defines the end range of the allowed port (from 1 to 65534) if the protocol TCP or UDP is chosen. |
-icmp_type | No | string | Defines the allowed type (from 0 to 254) if the protocol ICMP is chosen. |
-icmp_code | No | string | Defines the allowed code (from 0 to 254) if protocol ICMP is chosen. |
+| icmp_type | No | string | Defines the allowed type (from 0 to 254) if the protocol ICMP is chosen. |
+| icmp_code | No | string | Defines the allowed code (from 0 to 254) if protocol ICMP is chosen. |
 
 \* See the *Description* column for details.
 
@@ -823,7 +823,7 @@ resource "profitbricks_loadbalancer" "example" {
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| datacenter_id | Yes* | string | UUID of an existing Virtual Data Center resource. This parameters is not required if used under Server resource. |
 | nic_id | Yes* | string | |
 | dhcp | No | boolean | Indicates if the load balancer will reserve an IP using DHCP. |
 | ip | No | string | IPv4 address of the load balancer. |
@@ -852,10 +852,9 @@ data "profitbricks_datacenter" "dc_example" {
 | Parameter | Required | Type | Description |
 |---|---|---|---|
 | name | Yes* | string | Name of part of the name. |
-| location | no  | string | Id of the location |
+| location | no  | string | Id of the location. |
 
 If both parameters are provided the data source will use both to filter out the results.  
-
 
 ### Images Data Source
 
@@ -876,12 +875,10 @@ data "profitbricks_image" "image_example" {
 |---|---|---|---|
 | name | Yes | string | Name of part of the name. |
 | version | No | string | Version of the image (see details below). |
-| location | No  | string | Id of the location |
+| location | No  | string | Id of the location. |
 | type | No  | string | Image type. |
 
-If both 'name' and 'version' are provided the plugin will concatenate two strings in this format *[name]-[version]*. 
-
-\* See [Example](https://github.com/ProfitBricks/terraform-provider-profitbricks/tree/master/example/main.tf#L10-L15) 
+If both `name` and `version` are provided the plugin will concatenate two strings in this format *[name]-[version]*.
 
 ### Locations Data Source
 
@@ -900,8 +897,6 @@ data "profitbricks_location" "test1" {
 |---|---|---|---|
 | name | Yes | string | Name of part of the name. |
 | feature | No  | string | Feature name.  |
-
-\* See [Example](https://github.com/ProfitBricks/terraform-provider-profitbricks/tree/master/example/main.tf#L5-L8) 
 
 ## Support
 
