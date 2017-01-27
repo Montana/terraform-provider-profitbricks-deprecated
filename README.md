@@ -25,7 +25,7 @@
 
 ## Introduction
 
-The ProfitBricks provider for Terraform is used to interact with the cloud computing and storage resources provided by ProfitBricks. Before you begin you will need to have [signed up for a ProfitBricks account](https://www.profitbricks.com/signup). The credentials you create during sign-up will be used to authenticate against the [Cloud API](https://devops.profitbricks.com/api).
+The ProfitBricks provider for Terraform is used to interact with the cloud computing and storage resources provided by ProfitBricks. Before you begin you will need to have [signed up for a ProfitBricks account](https://www.profitbricks.com/signup). The credentials you create during sign-up will be used to authenticate against the Cloud API.
 
 ## Installation
 
@@ -112,7 +112,7 @@ Available commands are:
 
 Download the desired release archive from [ProfitBricks Terraform Provider Releases](https://github.com/profitbricks/terraform-provider-profitbricks/releases). Extract the binary from the archive and place it in the same location you used for the Terraform binary in the previous step. It should have the name `terraform-provider-profitbricks` or `terraform-provider-profitbricks.exe`
 
-The binary should be available in the *PATH* if you made the changes to that enviroment variable as described above.
+The binary should be available in the *PATH* if you made the changes to that environment variable as described above.
 
 ### Build Plugin from Source
 
@@ -138,7 +138,7 @@ The resulting binary can be copied to the same directory you installed Terraform
 
 ## Plugin Usage
 
-We wil go through a basic example of provisioning a server inside a Virtual Data Center after providing Terraform with our credentials.
+We will go through a basic example of provisioning a server inside a Virtual Data Center after providing Terraform with our credentials.
 
 ### Credentials
 
@@ -838,12 +838,27 @@ This section describes the various ProfitBricks data sources which allow ProfitB
 
 ### Data Centers Data Source
 
+
 #### Example Syntax
+
+This example would search for Virtual Data Centers with the string "test_dc" in the *name* and "us" in the *location*.
 
 ```
 data "profitbricks_datacenter" "dc_example" {
-  name = "test_name"
-  location = "location_id"
+  name = "test_dc"
+  location = "us"
+}
+```
+
+#### Example Usage
+
+If the example data center data source search above returned a valid result, it could be used later in the configuration. The following example code uses the returned value to provision a LAN resource inside the Virtual Data Center.
+
+```
+resource "profitbricks_lan" "webserver_lan" {
+  datacenter_id = "${data.profitbricks_datacenter.dc_example.id}"
+  public = true
+  name = "public"
 }
 ```
 
@@ -851,14 +866,18 @@ data "profitbricks_datacenter" "dc_example" {
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| name | Yes* | string | Name of part of the name. |
-| location | no  | string | Id of the location. |
+| name | Yes* | string | Name or part of the name of an existing Virtual Data Center that you want to search for. |
+| location | no  | string | Id or part of the id of the existing Virtual Data Center's location. |
 
-If both parameters are provided the data source will use both to filter out the results.  
+If both parameters are provided the data source will use both to filter out the results.
 
 ### Images Data Source
 
+The images data source can be used to search for and return an existing image which can then be used to provision a server.
+
 #### Example Syntax
+
+In this example, we will search for existing images that match our desired *name*, *type*, *version*, and *location*.
 
 ```
 data "profitbricks_image" "image_example" {
@@ -869,34 +888,53 @@ data "profitbricks_image" "image_example" {
 }
 ```
 
+#### Example Usage
+
+Once we have a valid result, we can make use of it when provisioning a new volume or server like this:
+
+```
+image_name = "${data.profitbricks_image.image_example.id}"
+```
+
 #### Argument Reference
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| name | Yes | string | Name of part of the name. |
+| name | Yes | string | Name or part of the name of an existing image that you want to search for. |
 | version | No | string | Version of the image (see details below). |
-| location | No  | string | Id of the location. |
-| type | No  | string | Image type. |
+| location | No  | string | Id or part of the id of the existing image's location. |
+| type | No  | string | The image type, HDD or CD-ROM. |
 
-If both `name` and `version` are provided the plugin will concatenate two strings in this format *[name]-[version]*.
+If both `name` and `version` are provided the plugin will concatenate the two strings in this format *[name]-[version]*.
 
 ### Locations Data Source
 
+The locations data source can be used to search for and return an existing location which can then be used elsewhere in the configuration. There are currently three possible locations: "us/las", "de/fra", and "de/fkb". Therefore, this data source may be of limited use.
+
 #### Example Syntax
 
+This example search would return a location matching "karlsruhe" that has the feature "SSD".
+
 ```
-data "profitbricks_location" "test1" {
+data "profitbricks_location" "loc1" {
   name = "karlsruhe"
   feature = "SSD"
 }
 ```
 
+#### Example Usage
+
+
+```
+location = "${data.profitbricks_location.loc1.id}"
+```
+
 #### Argument Reference
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| name | Yes | string | Name of part of the name. |
-| feature | No  | string | Feature name.  |
+| name | Yes | string | Name or part of the location name to search for. |
+| feature | No  | string | A desired feature that the location must be able to provide. |
 
 ## Support
 
