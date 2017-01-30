@@ -842,12 +842,12 @@ The data centers data source can be used to search for and return an existing Vi
 
 #### Example Syntax
 
-This example would search for Virtual Data Centers with the string "test_dc" in the *name* and "us" in the *location*.
+This example would search for Virtual Data Centers with the string "test_dc" in the *name* and "us/las" as the *location*.
 
 ```
 data "profitbricks_datacenter" "dc_example" {
   name = "test_dc"
-  location = "us"
+  location = "us/las"
 }
 ```
 
@@ -868,7 +868,7 @@ resource "profitbricks_lan" "webserver_lan" {
 | Parameter | Required | Type | Description |
 |---|---|---|---|
 | name | Yes* | string | Name or part of the name of an existing Virtual Data Center that you want to search for. |
-| location | no  | string | Id or part of the id of the existing Virtual Data Center's location. |
+| location | No  | string | The id of the existing Virtual Data Center's location. [ "de/fkb", "de/fra", or "us/las"] |
 
 If both parameters are provided the data source will use both to filter out the results.
 
@@ -903,25 +903,26 @@ image_name = "${data.profitbricks_image.image_example.id}"
 |---|---|---|---|
 | name | Yes | string | Name or part of the name of an existing image that you want to search for. |
 | version | No | string | Version of the image (see details below). |
-| location | No  | string | Id or part of the id of the existing image's location. |
 | type | No  | string | The image type, HDD or CD-ROM. |
 
 If both `name` and `version` are provided the plugin will concatenate the two strings in this format *[name]-[version]*.
 
 ### Locations Data Source
 
-The locations data source can be used to search for and return an existing location which can then be used elsewhere in the configuration. There are currently three possible locations: "us/las", "de/fra", and "de/fkb". Therefore, this data source may be of limited use.
+The locations data source can be used to search for and return an existing location which can then be used elsewhere in the configuration. There are currently three possible locations: "us/las", "de/fra", and "de/fkb".
 
 #### Example Syntax
 
-This example search would return a location matching "karlsruhe" that has the feature "SSD".
+This example search would return a location matching "karls" that has the feature "SSD".
 
 ```
 data "profitbricks_location" "loc1" {
-  name = "karlsruhe"
+  name = "karls"
   feature = "SSD"
 }
 ```
+
+Which should return the location id, "de/fkb", since that location has the name, "karlsruhe" and supports the feature, "SSD".
 
 #### Example Usage
 
@@ -936,7 +937,7 @@ location = "${data.profitbricks_location.loc1.id}"
 | Parameter | Required | Type | Description |
 |---|---|---|---|
 | name | Yes | string | Name or part of the location name to search for. |
-| feature | No  | string | A desired feature that the location must be able to provide. |
+| feature | No  | string | A desired feature ["SSD", "MULTIPLE_CPU"] that the location must be able to provide. |
 
 ## Support
 
