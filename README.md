@@ -903,6 +903,7 @@ image_name = "${data.profitbricks_image.image_example.id}"
 |---|---|---|---|
 | name | Yes | string | Name or part of the name of an existing image that you want to search for. |
 | version | No | string | Version of the image (see details below). |
+| location | No  | string | The id of the location of the image. [ "de/fkb", "de/fra", or "us/las"] |
 | type | No  | string | The image type, HDD or CD-ROM. |
 
 If both `name` and `version` are provided the plugin will concatenate the two strings in this format *[name]-[version]*.
