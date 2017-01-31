@@ -156,11 +156,11 @@ Or you can include your credentials inside the `main.tf` file like this:
 provider "profitbricks" {
     username = "profitbricks_username"
     password = "profitbricks_password"
-    timeout = 100
+    retries = 100
 }
 ```
 
-Timeout describes the number of retries while waiting for a resource to be provisioned. The default value is 50.
+Retries describes the number of retries while waiting for a resource to be provisioned. The default value is 50.
 
 ### Basic Example
 
@@ -628,7 +628,7 @@ resource "profitbricks_server" "example" {
        image_name = "${var.ubuntu}"
        size = 5
        disk_type = "SSD"
-       ssh_key_path = "${var.private_key_path}"
+       ssh_key_path = ["${var.private_key_path}"]
        image_password = "test1234"
      }
      nic {
@@ -676,7 +676,7 @@ resource "profitbricks_volume" "example" {
   image_name = "${var.ubuntu}"
   size = 5
   disk_type = "HDD"
-  sshkey_path = "${var.private_key_path}"
+  ssh_key_path = ["${var.private_key_path}"]
   bus = "VIRTIO"
   availablity_zone = "ZONE_1"
 }
@@ -692,7 +692,7 @@ resource "profitbricks_volume" "example" {
 | bus | Yes | string | The bus type of the storage volume. ["VIRTIO", or "IDE"] |
 | size |  Yes | integer | The size of the storage volume in GB. |
 | image_password | Yes* | string | Password set for the `root` or `Administrator` user on ProfitBricks provided images. Required if `sshkey_path` is not provided. |
-| sshkey_path | Yes* | string | Path to a file containing a public SSH key that will be injected into ProfitBricks provided Linux images. Required if `image_password` is not provided. |
+| ssh_key_path | Yes* | string | List of paths to files containing a public SSH key that will be injected into ProfitBricks provided Linux images. Required if `image_password` is not provided. |
 | image_name | Yes* | string | The image or snapshot UUID. It is required if `licence_type` is not provided. |
 | licence_type | Yes* |string | Required if `image_name` is not provided. ["LINUX", "WINDOWS", or "OTHER"] |
 | name | No | string | A name for the storage volume. |

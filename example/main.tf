@@ -1,5 +1,5 @@
 provider "profitbricks" {
-  timeout = 100
+  retries = 100
 }
 
 data "profitbricks_location" "loc" {

@@ -28,7 +28,7 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("PROFITBRICKS_API_URL", profitbricks.Endpoint),
 				Description: "ProfitBricks REST API URL.",
 			},
-			"timeout": {
+			"retries": {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
@@ -58,7 +58,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		Username: d.Get("username").(string),
 		Password: d.Get("password").(string),
 		Endpoint: d.Get("endpoint").(string),
-		Timeout:  d.Get("timeout").(int),
+		Timeout:  d.Get("retries").(int),
 	}
 	return config.Client()
 }
