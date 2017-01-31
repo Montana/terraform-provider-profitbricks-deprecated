@@ -406,7 +406,7 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 					}
 
 					request.Entities.Nics.Items[0].Entities = &profitbricks.NicEntities{
-						&profitbricks.FirewallRules{
+						Firewallrules : &profitbricks.FirewallRules{
 							Items: []profitbricks.FirewallRule{
 								firewall,
 							},
