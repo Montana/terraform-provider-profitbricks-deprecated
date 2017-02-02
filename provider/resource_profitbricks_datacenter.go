@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"strings"
 	"time"
-	"regexp"
 )
 
 func resourceProfitBricksDatacenter() *schema.Resource {
@@ -17,6 +16,9 @@ func resourceProfitBricksDatacenter() *schema.Resource {
 		Read:   resourceProfitBricksDatacenterRead,
 		Update: resourceProfitBricksDatacenterUpdate,
 		Delete: resourceProfitBricksDatacenterDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 
 			//Datacenter parameters
@@ -39,9 +41,6 @@ func resourceProfitBricksDatacenter() *schema.Resource {
 }
 
 func resourceProfitBricksDatacenterCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	datacenter := profitbricks.Datacenter{
 		Properties: profitbricks.DatacenterProperties{
 			Name:     d.Get("name").(string),
@@ -70,8 +69,6 @@ func resourceProfitBricksDatacenterCreate(d *schema.ResourceData, meta interface
 }
 
 func resourceProfitBricksDatacenterRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
 	datacenter := profitbricks.GetDatacenter(d.Id())
 	if datacenter.StatusCode > 299 {
 		return fmt.Errorf("Error while fetching a data center ID %s %s", d.Id(), datacenter.Response)
@@ -84,9 +81,6 @@ func resourceProfitBricksDatacenterRead(d *schema.ResourceData, meta interface{}
 }
 
 func resourceProfitBricksDatacenterUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	obj := profitbricks.DatacenterProperties{}
 
 	if d.HasChange("name") {
@@ -106,9 +100,6 @@ func resourceProfitBricksDatacenterUpdate(d *schema.ResourceData, meta interface
 }
 
 func resourceProfitBricksDatacenterDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	dcid := d.Id()
 	resp := profitbricks.DeleteDatacenter(dcid)
 
@@ -125,8 +116,6 @@ func resourceProfitBricksDatacenterDelete(d *schema.ResourceData, meta interface
 
 func waitTillProvisioned(meta interface{}, path string) error {
 	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-	//log.Printf("[DEBUG] Request status path: %s", path)
 	waitCount := 50
 
 	if config.Timeout != 0 {
@@ -179,15 +168,10 @@ func getImageId(dcId string, imageName string, imageType string) string {
 			if imageType == "SSD" {
 				imageType = "HDD"
 			}
-			if (imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && i.Properties.ImageType == imageType && i.Properties.Location == dc.Properties.Location && i.Properties.Public == true) {
+			if imgName != "" && strings.Contains(strings.ToLower(imgName), strings.ToLower(imageName)) && i.Properties.ImageType == imageType && i.Properties.Location == dc.Properties.Location && i.Properties.Public == true {
 				return i.Id
 			}
 		}
 	}
 	return ""
-}
-
-func IsValidUUID(uuid string) bool {
-	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
-	return r.MatchString(uuid)
 }
