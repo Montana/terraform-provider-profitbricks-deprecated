@@ -37,9 +37,6 @@ func resourceProfitBricksIPBlock() *schema.Resource {
 }
 
 func resourceProfitBricksIPBlockCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	ipblock := profitbricks.IpBlock{
 		Properties: profitbricks.IpBlockProperties{
 			Size:     d.Get("size").(int),
@@ -62,9 +59,6 @@ func resourceProfitBricksIPBlockCreate(d *schema.ResourceData, meta interface{})
 }
 
 func resourceProfitBricksIPBlockRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	ipblock := profitbricks.GetIpBlock(d.Id())
 
 	if ipblock.StatusCode > 299 {
@@ -81,9 +75,6 @@ func resourceProfitBricksIPBlockRead(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceProfitBricksIPBlockDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	resp := profitbricks.ReleaseIpBlock(d.Id())
 	if resp.StatusCode > 299 {
 		return fmt.Errorf("An error occured while releasing an ipblock ID: %s %s", d.Id(), string(resp.Body))
