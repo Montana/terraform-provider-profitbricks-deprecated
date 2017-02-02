@@ -44,9 +44,6 @@ func resourceProfitBricksLoadbalancer() *schema.Resource {
 }
 
 func resourceProfitBricksLoadbalancerCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	lb := profitbricks.Loadbalancer{
 		Properties: profitbricks.LoadbalancerProperties{
 			Name: d.Get("name").(string),
@@ -80,7 +77,6 @@ func resourceProfitBricksLoadbalancerCreate(d *schema.ResourceData, meta interfa
 }
 
 func resourceProfitBricksLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
-
 	dcId := d.Get("datacenter_id").(string)
 	lbId := d.Id()
 	if dcId == "" {
@@ -101,9 +97,6 @@ func resourceProfitBricksLoadbalancerRead(d *schema.ResourceData, meta interface
 }
 
 func resourceProfitBricksLoadbalancerUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	properties := profitbricks.LoadbalancerProperties{}
 	if d.HasChange("name") {
 		_, new := d.GetChange("name")
@@ -144,9 +137,6 @@ func resourceProfitBricksLoadbalancerUpdate(d *schema.ResourceData, meta interfa
 }
 
 func resourceProfitBricksLoadbalancerDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	resp := profitbricks.DeleteLoadbalancer(d.Get("datacenter_id").(string), d.Id())
 
 	if resp.StatusCode > 299 {

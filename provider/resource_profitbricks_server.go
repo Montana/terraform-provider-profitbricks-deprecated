@@ -233,9 +233,6 @@ func resourceProfitBricksServer() *schema.Resource {
 }
 
 func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	request := profitbricks.Server{
 		Properties: profitbricks.ServerProperties{
 			Name:  d.Get("name").(string),
@@ -449,9 +446,6 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Id()
 	if dcId == "" {
@@ -530,9 +524,6 @@ func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceProfitBricksServerUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	dcId := d.Get("datacenter_id").(string)
 
 	request := profitbricks.ServerProperties{}
@@ -651,9 +642,6 @@ func resourceProfitBricksServerUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceProfitBricksServerDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	dcId := d.Get("datacenter_id").(string)
 
 	server := profitbricks.GetServer(dcId, d.Id())
