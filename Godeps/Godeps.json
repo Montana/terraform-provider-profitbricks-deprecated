@@ -303,8 +303,8 @@
 		},
 		{
 			"ImportPath": "github.com/profitbricks/profitbricks-sdk-go",
-			"Comment": "v3.0.1-1-g4765c76",
-			"Rev": "4765c76b6cb18b03649f2fa84cd5a83efcccb777"
+			"Comment": "v3.0.1-2-gb279e1a",
+			"Rev": "b279e1adcaf1c9cae4d6520c1bdbbf4674e7806e"
 		},
 		{
 			"ImportPath": "github.com/satori/go.uuid",

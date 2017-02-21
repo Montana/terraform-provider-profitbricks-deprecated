@@ -14,21 +14,21 @@ func Provider() terraform.ResourceProvider {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("PROFITBRICKS_USERNAME", nil),
-				Description: "Profitbricks username for API operations.",
+				Description: "ProfitBricks username for API operations.",
 			},
 			"password": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("PROFITBRICKS_PASSWORD", nil),
-				Description: "Profitbricks password for API operations.",
+				Description: "ProfitBricks password for API operations.",
 			},
 			"endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("PROFITBRICKS_API_URL", profitbricks.Endpoint),
-				Description: "Profitbricks REST API URL.",
+				Description: "ProfitBricks REST API URL.",
 			},
-			"timeout": {
+			"retries": {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
@@ -54,7 +54,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		Username: d.Get("username").(string),
 		Password: d.Get("password").(string),
 		Endpoint: d.Get("endpoint").(string),
-		Timeout:  d.Get("timeout").(int),
+		Timeout:  d.Get("retries").(int),
 	}
 	return config.Client()
 }
