@@ -1,9 +1,9 @@
 package profitbricks
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go"
-	"fmt"
 	"log"
 	"strings"
 )
@@ -20,19 +20,11 @@ func dataSourceLocation() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"id" : {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
 
 func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-	profitbricks.SetDepth("5")
-
 	locations := profitbricks.ListLocations()
 
 	if locations.StatusCode > 299 {
@@ -42,7 +34,7 @@ func dataSourceLocationRead(d *schema.ResourceData, meta interface{}) error {
 	name, nameOk := d.GetOk("name")
 	feature, featureOk := d.GetOk("features")
 
-	if !nameOk && !featureOk{
+	if !nameOk && !featureOk {
 		return fmt.Errorf("Either 'name' or 'feature' must be provided.")
 	}
 	results := []profitbricks.Location{}

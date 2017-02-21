@@ -21,6 +21,9 @@ func resourceProfitBricksServer() *schema.Resource {
 		Read:   resourceProfitBricksServerRead,
 		Update: resourceProfitBricksServerUpdate,
 		Delete: resourceProfitBricksServerDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 
 			//Server parameters
@@ -230,9 +233,6 @@ func resourceProfitBricksServer() *schema.Resource {
 }
 
 func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	request := profitbricks.Server{
 		Properties: profitbricks.ServerProperties{
 			Name:  d.Get("name").(string),
@@ -262,15 +262,11 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 			var image, licenceType, availabilityZone string
 
 			if rawMap["image_name"] != nil {
-				if !IsValidUUID(rawMap["image_name"].(string)) {
-					image = getImageId(d.Get("datacenter_id").(string), rawMap["image_name"].(string), rawMap["disk_type"].(string))
-					if image == "" {
-						dc := profitbricks.GetDatacenter(d.Get("datacenter_id").(string))
-						return fmt.Errorf("Image '%s' doesn't exist. in location %s", rawMap["image_name"], dc.Properties.Location)
+				image = getImageId(d.Get("datacenter_id").(string), rawMap["image_name"].(string), rawMap["disk_type"].(string))
+				if image == "" {
+					dc := profitbricks.GetDatacenter(d.Get("datacenter_id").(string))
+					return fmt.Errorf("Image '%s' doesn't exist. in location %s", rawMap["image_name"], dc.Properties.Location)
 
-					}
-				} else {
-					image = rawMap["image_name"].(string)
 				}
 			}
 			if rawMap["licence_type"] != nil {
@@ -406,7 +402,7 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 					}
 
 					request.Entities.Nics.Items[0].Entities = &profitbricks.NicEntities{
-						&profitbricks.FirewallRules{
+						Firewallrules : &profitbricks.FirewallRules{
 							Items: []profitbricks.FirewallRule{
 								firewall,
 							},
@@ -450,9 +446,6 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Id()
 	if dcId == "" {
@@ -531,9 +524,6 @@ func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceProfitBricksServerUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	dcId := d.Get("datacenter_id").(string)
 
 	request := profitbricks.ServerProperties{}
@@ -652,9 +642,6 @@ func resourceProfitBricksServerUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceProfitBricksServerDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	dcId := d.Get("datacenter_id").(string)
 
 	server := profitbricks.GetServer(dcId, d.Id())

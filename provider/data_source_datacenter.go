@@ -1,9 +1,9 @@
 package profitbricks
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go"
-	"fmt"
 	"log"
 	"strings"
 )
@@ -20,31 +20,24 @@ func dataSourceDataCenter() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"id" : {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
 
 func dataSourceDataCenterRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	datacenters := profitbricks.ListDatacenters()
 
 	if datacenters.StatusCode > 299 {
 		return fmt.Errorf("An error occured while fetching datacenters %s", datacenters.Response)
 	}
 
-	name, _ := d.GetOk("name")
+	name := d.Get("name").(string)
 	location, locationOk := d.GetOk("location")
 
 	results := []profitbricks.Datacenter{}
 
 	for _, dc := range datacenters.Items {
-		if dc.Properties.Name == name.(string) || strings.Contains(dc.Properties.Name, name.(string)) {
+		if dc.Properties.Name == name || strings.Contains(dc.Properties.Name, name) {
 			results = append(results, dc)
 		}
 	}

@@ -25,7 +25,7 @@
 
 ## Introduction
 
-The ProfitBricks provider for Terraform is used to interact with the cloud computing and storage resources provided by ProfitBricks. Before you begin you will need to have [signed up for a ProfitBricks account](https://www.profitbricks.com/signup). The credentials you create during sign-up will be used to authenticate against the [Cloud API](https://devops.profitbricks.com/api).
+The ProfitBricks provider for Terraform is used to interact with the cloud computing and storage resources provided by ProfitBricks. Before you begin you will need to have [signed up for a ProfitBricks account](https://www.profitbricks.com/signup). The credentials you create during sign-up will be used to authenticate against the Cloud API.
 
 ## Installation
 
@@ -112,7 +112,7 @@ Available commands are:
 
 Download the desired release archive from [ProfitBricks Terraform Provider Releases](https://github.com/profitbricks/terraform-provider-profitbricks/releases). Extract the binary from the archive and place it in the same location you used for the Terraform binary in the previous step. It should have the name `terraform-provider-profitbricks` or `terraform-provider-profitbricks.exe`
 
-The binary should be available in the *PATH* if you made the changes to that enviroment variable as described above.
+The binary should be available in the *PATH* if you made the changes to that environment variable as described above.
 
 ### Build Plugin from Source
 
@@ -138,7 +138,7 @@ The resulting binary can be copied to the same directory you installed Terraform
 
 ## Plugin Usage
 
-We wil go through a basic example of provisioning a server inside a Virtual Data Center after providing Terraform with our credentials.
+We will go through a basic example of provisioning a server inside a Virtual Data Center after providing Terraform with our credentials.
 
 ### Credentials
 
@@ -156,11 +156,11 @@ Or you can include your credentials inside the `main.tf` file like this:
 provider "profitbricks" {
     username = "profitbricks_username"
     password = "profitbricks_password"
-    timeout = 100
+    retries = 100
 }
 ```
 
-Timeout describes the number of retries while waiting for a resource to be provisioned. The default value is 50.
+Retries describes the number of retries while waiting for a resource to be provisioned. The default value is 50.
 
 ### Basic Example
 
@@ -628,7 +628,7 @@ resource "profitbricks_server" "example" {
        image_name = "${var.ubuntu}"
        size = 5
        disk_type = "SSD"
-       ssh_key_path = "${var.private_key_path}"
+       ssh_key_path = ["${var.private_key_path}"]
        image_password = "test1234"
      }
      nic {
@@ -676,7 +676,7 @@ resource "profitbricks_volume" "example" {
   image_name = "${var.ubuntu}"
   size = 5
   disk_type = "HDD"
-  sshkey_path = "${var.private_key_path}"
+  ssh_key_path = ["${var.private_key_path}"]
   bus = "VIRTIO"
   availablity_zone = "ZONE_1"
 }
@@ -686,13 +686,13 @@ resource "profitbricks_volume" "example" {
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| datacenter_id | Yes* | string | UUID of an existing Virtual Data Center resource. This parameters is not required if used under Server resource. |
 | server_id | Yes* | string | UUID of an existing server resource. This parameters is not required if used under Server resource. |
 | disk_type | Yes | string | The storage volume type. ["HDD", or "SSD"] |
 | bus | Yes | string | The bus type of the storage volume. ["VIRTIO", or "IDE"] |
 | size |  Yes | integer | The size of the storage volume in GB. |
-| image_password | Yes* | string | Password set for the `root` or `Administrator` user on ProfitBricks provided images. Required if `sshkey_path` is not provided. |
-| sshkey_path | Yes* | string | Path to a file containing a public SSH key that will be injected into ProfitBricks provided Linux images. Required if `image_password` is not provided. |
+| image_password | Yes* | string | Password set for the `root` or `Administrator` user on ProfitBricks provided images. Required if `ssh_key_path` is not provided. |
+| ssh_key_path | Yes* | string | List of paths to files containing a public SSH key that will be injected into ProfitBricks provided Linux images. Required if `image_password` is not provided. |
 | image_name | Yes* | string | The image or snapshot UUID. It is required if `licence_type` is not provided. |
 | licence_type | Yes* |string | Required if `image_name` is not provided. ["LINUX", "WINDOWS", or "OTHER"] |
 | name | No | string | A name for the storage volume. |
@@ -718,7 +718,7 @@ resource "profitbricks_nic" "example" {
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| datacenter_id | Yes* | string | UUID of an existing Virtual Data Center resource. This parameters is not required if used under Server resource. |
 | server_id | Yes*  | string | UUID of an existing server resource. This parameters is not required if used under Server resource. |
 | lan | Yes | integer | The LAN ID the NIC will sit on. |
 | name| No | string |  The name of the LAN. |
@@ -763,7 +763,7 @@ resource "profitbricks_lan" "example" {
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| datacenter_id | Yes* | string | UUID of an existing Virtual Data Center resource. This parameters is not required if used under Server resource. |
 | name | No | string | The name of the LAN |
 | public | No | boolean | Indicates if the LAN faces the public Internet or is "private". |
 
@@ -791,7 +791,7 @@ resource "profitbricks_firewall" "example" {
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| datacenter_id | Yes* | string | UUID of an existing Virtual Data Center resource. This parameters is not required if used under Server resource. |
 | server_id | Yes*  | string | UUID of an existing server resource. This parameters is not required if used under Server resource. |
 | nic_id | Yes*  | string | UUID of an existing server resource. This parameters is not required if used under Server resource. |
 | protocol | Yes | string | The protocol for the rule: TCP, UDP, ICMP, ANY. |
@@ -801,8 +801,8 @@ resource "profitbricks_firewall" "example" {
 | target_ip | No | string | Only traffic directed to the respective IP address of the NIC is allowed. |
 | port_range_start | No  | string | Defines the start range of the allowed port (from 1 to 65534) if protocol TCP or UDP is chosen. |
 | port_range_end | No | string | Defines the end range of the allowed port (from 1 to 65534) if the protocol TCP or UDP is chosen. |
-icmp_type | No | string | Defines the allowed type (from 0 to 254) if the protocol ICMP is chosen. |
-icmp_code | No | string | Defines the allowed code (from 0 to 254) if protocol ICMP is chosen. |
+| icmp_type | No | string | Defines the allowed type (from 0 to 254) if the protocol ICMP is chosen. |
+| icmp_code | No | string | Defines the allowed code (from 0 to 254) if protocol ICMP is chosen. |
 
 \* See the *Description* column for details.
 
@@ -823,7 +823,7 @@ resource "profitbricks_loadbalancer" "example" {
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| datacenter_id | Yes* | string | UUID of an existing Virtal Data Center resource. This parameters is not required if used under Server resource. |
+| datacenter_id | Yes* | string | UUID of an existing Virtual Data Center resource. This parameters is not required if used under Server resource. |
 | nic_id | Yes* | string | |
 | dhcp | No | boolean | Indicates if the load balancer will reserve an IP using DHCP. |
 | ip | No | string | IPv4 address of the load balancer. |
@@ -838,12 +838,28 @@ This section describes the various ProfitBricks data sources which allow ProfitB
 
 ### Data Centers Data Source
 
+The data centers data source can be used to search for and return an existing Virtual Data Center. You can provide a string for the `name` and `location` parameters which will be compared with provisioned Virtual Data Centers. If a single match is found, it will be returned. If your search results in multiple matches, an error will be generated. When this happens, please refine your search string so that it is specific enough to return only one result.
+
 #### Example Syntax
+
+This example would search for Virtual Data Centers with the string "test_dc" in the *name* and "us/las" as the *location*.
 
 ```
 data "profitbricks_datacenter" "dc_example" {
-  name = "test_name"
-  location = "location_id"
+  name = "test_dc"
+  location = "us/las"
+}
+```
+
+#### Example Usage
+
+If the example data center data source search above returned a valid result, it could be used later in the configuration. The following example code uses the returned value to provision a LAN resource inside the Virtual Data Center.
+
+```
+resource "profitbricks_lan" "webserver_lan" {
+  datacenter_id = "${data.profitbricks_datacenter.dc_example.id}"
+  public = true
+  name = "public"
 }
 ```
 
@@ -851,15 +867,18 @@ data "profitbricks_datacenter" "dc_example" {
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| name | Yes* | string | Name of part of the name. |
-| location | no  | string | Id of the location |
+| name | Yes* | string | Name or part of the name of an existing Virtual Data Center that you want to search for. |
+| location | No  | string | The id of the existing Virtual Data Center's location. [ "de/fkb", "de/fra", or "us/las"] |
 
-If both parameters are provided the data source will use both to filter out the results.  
-
+If both parameters are provided the data source will use both to filter out the results.
 
 ### Images Data Source
 
+The images data source can be used to search for and return an existing image which can then be used to provision a server.
+
 #### Example Syntax
+
+In this example, we will search for existing images that match our desired *name*, *type*, *version*, and *location*.
 
 ```
 data "profitbricks_image" "image_example" {
@@ -870,38 +889,56 @@ data "profitbricks_image" "image_example" {
 }
 ```
 
+#### Example Usage
+
+Once we have a valid result, we can make use of it when provisioning a new volume or server like this:
+
+```
+image_name = "${data.profitbricks_image.image_example.id}"
+```
+
 #### Argument Reference
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| name | Yes | string | Name of part of the name. |
+| name | Yes | string | Name or part of the name of an existing image that you want to search for. |
 | version | No | string | Version of the image (see details below). |
-| location | No  | string | Id of the location |
-| type | No  | string | Image type. |
+| location | No  | string | The id of the location of the image. [ "de/fkb", "de/fra", or "us/las"] |
+| type | No  | string | The image type, HDD or CD-ROM. |
 
-If both 'name' and 'version' are provided the plugin will concatenate two strings in this format *[name]-[version]*. 
-
-\* See [Example](https://github.com/ProfitBricks/terraform-provider-profitbricks/tree/master/example/main.tf#L10-L15) 
+If both `name` and `version` are provided the plugin will concatenate the two strings in this format *[name]-[version]*.
 
 ### Locations Data Source
 
+The locations data source can be used to search for and return an existing location which can then be used elsewhere in the configuration. There are currently three possible locations: "us/las", "de/fra", and "de/fkb".
+
 #### Example Syntax
 
+This example search would return a location matching "karls" that has the feature "SSD".
+
 ```
-data "profitbricks_location" "test1" {
-  name = "karlsruhe"
+data "profitbricks_location" "loc1" {
+  name = "karls"
   feature = "SSD"
 }
 ```
 
+Which should return the location id, "de/fkb", since that location has the name, "karlsruhe" and supports the feature, "SSD".
+
+#### Example Usage
+
+Once we have a valid location result, we can make use of it elsewhere in the configuration.
+
+```
+location = "${data.profitbricks_location.loc1.id}"
+```
+
 #### Argument Reference
 
 | Parameter | Required | Type | Description |
 |---|---|---|---|
-| name | Yes | string | Name of part of the name. |
-| feature | No  | string | Feature name.  |
-
-\* See [Example](https://github.com/ProfitBricks/terraform-provider-profitbricks/tree/master/example/main.tf#L5-L8) 
+| name | Yes | string | Name or part of the location name to search for. |
+| feature | No  | string | A desired feature ["SSD", "MULTIPLE_CPU"] that the location must be able to provide. |
 
 ## Support
 

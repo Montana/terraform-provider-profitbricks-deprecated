@@ -1,5 +1,5 @@
 provider "profitbricks" {
-  timeout = 100
+  retries = 100
 }
 
 data "profitbricks_location" "loc" {
@@ -10,7 +10,7 @@ data "profitbricks_location" "loc" {
 data "profitbricks_image" "test_img" {
   name = "Ubuntu"
   type = "HDD"
-  version = "14"
+  version = "16"
   location = "${data.profitbricks_location.loc.id}"
 }
 

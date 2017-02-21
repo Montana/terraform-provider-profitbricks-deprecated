@@ -14,6 +14,9 @@ func resourceProfitBricksVolume() *schema.Resource {
 		Read:   resourceProfitBricksVolumeRead,
 		Update: resourceProfitBricksVolumeUpdate,
 		Delete: resourceProfitBricksVolumeDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			"image_name": {
 				Type:     schema.TypeString,
@@ -70,9 +73,6 @@ func resourceProfitBricksVolume() *schema.Resource {
 }
 
 func resourceProfitBricksVolumeCreate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	var err error
 	var ssh_keypath []interface{}
 	dcId := d.Get("datacenter_id").(string)
@@ -104,13 +104,7 @@ func resourceProfitBricksVolumeCreate(d *schema.ResourceData, meta interface{}) 
 			publicKeys = append(publicKeys, publicKey)
 		}
 	}
-
-	var image string
-	if !IsValidUUID(image_name) {
-		image = getImageId(d.Get("datacenter_id").(string), image_name, d.Get("disk_type").(string))
-	} else {
-		image = image_name
-	}
+	image := getImageId(d.Get("datacenter_id").(string), image_name, d.Get("disk_type").(string))
 
 	volume := profitbricks.Volume{
 		Properties: profitbricks.VolumeProperties{
@@ -161,9 +155,6 @@ func resourceProfitBricksVolumeCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceProfitBricksVolumeRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	dcId := d.Get("datacenter_id").(string)
 
 	volumeId := d.Id()
@@ -191,9 +182,6 @@ func resourceProfitBricksVolumeRead(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceProfitBricksVolumeUpdate(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	properties := profitbricks.VolumeProperties{}
 	dcId := d.Get("datacenter_id").(string)
 
@@ -242,9 +230,6 @@ func resourceProfitBricksVolumeUpdate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceProfitBricksVolumeDelete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
-	profitbricks.SetAuth(config.Username, config.Password)
-
 	dcId := d.Get("datacenter_id").(string)
 
 	resp := profitbricks.DeleteVolume(dcId, d.Id())
