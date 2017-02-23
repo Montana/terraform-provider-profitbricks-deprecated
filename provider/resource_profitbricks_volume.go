@@ -6,6 +6,7 @@ import (
 	"github.com/profitbricks/profitbricks-sdk-go"
 	"log"
 	"strings"
+	"regexp"
 )
 
 func resourceProfitBricksVolume() *schema.Resource {
@@ -104,8 +105,13 @@ func resourceProfitBricksVolumeCreate(d *schema.ResourceData, meta interface{}) 
 			publicKeys = append(publicKeys, publicKey)
 		}
 	}
-	image := getImageId(d.Get("datacenter_id").(string), image_name, d.Get("disk_type").(string))
 
+	var image string
+	if !IsValidUUID(image_name) {
+		image = getImageId(d.Get("datacenter_id").(string), image_name, d.Get("disk_type").(string))
+	} else {
+		image = image_name
+	}
 	volume := profitbricks.Volume{
 		Properties: profitbricks.VolumeProperties{
 			Name:          d.Get("name").(string),
@@ -243,4 +249,9 @@ func resourceProfitBricksVolumeDelete(d *schema.ResourceData, meta interface{}) 
 	}
 	d.SetId("")
 	return nil
+}
+
+func IsValidUUID(uuid string) bool {
+	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
+	return r.MatchString(uuid)
 }
