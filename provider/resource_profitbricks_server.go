@@ -1,17 +1,13 @@
 package profitbricks
 
 import (
-	"crypto/x509"
 	"encoding/json"
-	"encoding/pem"
-	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"log"
-	"strconv"
 	"strings"
 )
 
@@ -261,14 +257,19 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 			var sshkey_path []interface{}
 			var image, licenceType, availabilityZone string
 
-			if rawMap["image_name"] != nil {
-				image = getImageId(d.Get("datacenter_id").(string), rawMap["image_name"].(string), rawMap["disk_type"].(string))
-				if image == "" {
-					dc := profitbricks.GetDatacenter(d.Get("datacenter_id").(string))
-					return fmt.Errorf("Image '%s' doesn't exist. in location %s", rawMap["image_name"], dc.Properties.Location)
+			if !IsValidUUID(rawMap["image_name"].(string)) {
+				if rawMap["image_name"] != nil {
+					image = getImageId(d.Get("datacenter_id").(string), rawMap["image_name"].(string), rawMap["disk_type"].(string))
+					if image == "" {
+						dc := profitbricks.GetDatacenter(d.Get("datacenter_id").(string))
+						return fmt.Errorf("Image '%s' doesn't exist. in location %s", rawMap["image_name"], dc.Properties.Location)
 
+					}
 				}
+			} else {
+				image = rawMap["image_name"].(string)
 			}
+
 			if rawMap["licence_type"] != nil {
 				licenceType = rawMap["licence_type"].(string)
 			}
@@ -434,7 +435,8 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 	}
 	d.SetId(server.Id)
 	server = profitbricks.GetServer(d.Get("datacenter_id").(string), server.Id)
-	d.Set("primary_nic", server.Entities.Nics.Items[0])
+
+	d.Set("primary_nic", server.Entities.Nics.Items[0].Id)
 	if len(server.Entities.Nics.Items[0].Properties.Ips) > 0 {
 		d.SetConnInfo(map[string]string{
 			"type":     "ssh",
@@ -458,23 +460,7 @@ func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) er
 	}
 
 	server := profitbricks.GetServer(dcId, serverId)
-
-	primarynic := ""
-
-	if server.Entities != nil && server.Entities.Nics != nil && len(server.Entities.Nics.Items) > 0 {
-		for _, n := range server.Entities.Nics.Items {
-			if n.Properties.Lan != 0 {
-				lan := profitbricks.GetLan(dcId, strconv.Itoa(n.Properties.Lan))
-				if lan.StatusCode > 299 {
-					return fmt.Errorf("Error while fetching a lan %s", lan.Response)
-				}
-				if lan.Properties.Public.(interface{}) == true {
-					primarynic = n.Id
-					break
-				}
-			}
-		}
-	}
+	primarynic := d.Get("primary_nic").(string)
 
 	d.Set("name", server.Properties.Name)
 	d.Set("cores", server.Properties.Cores)
@@ -484,9 +470,9 @@ func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[DEBUG] dcid, srvrid", dcId, serverId)
 
-	nics := profitbricks.ListNics(dcId, serverId)
+	//nics := profitbricks.ListNics(dcId, serverId)
 
-	nic := profitbricks.GetNic(dcId, serverId, nics.Items[0].Id)
+	nic := profitbricks.GetNic(dcId, serverId, primarynic)
 	log.Printf("[DEBUG] ********nic********", nic)
 
 	if len(nic.Properties.Ips) > 0 {
@@ -678,38 +664,4 @@ func readPublicKey(path string) (key string, err error) {
 		return "", err
 	}
 	return string(ssh.MarshalAuthorizedKey(pubKey)[:]), nil
-}
-
-func getSshKey(d *schema.ResourceData, path string) (privatekey string, publickey string, err error) {
-	pemBytes, err := ioutil.ReadFile(path)
-
-	if err != nil {
-		return "", "", err
-	}
-
-	block, _ := pem.Decode(pemBytes)
-
-	if block == nil {
-		return "", "", errors.New("File " + path + " contains nothing")
-	}
-
-	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-
-	if err != nil {
-		return "", "", err
-	}
-	priv_blk := pem.Block{
-		Type:    "RSA PRIVATE KEY",
-		Headers: nil,
-		Bytes:   x509.MarshalPKCS1PrivateKey(priv),
-	}
-
-	pub, err := ssh.NewPublicKey(&priv.PublicKey)
-	if err != nil {
-		return "", "", err
-	}
-	publickey = string(ssh.MarshalAuthorizedKey(pub))
-	privatekey = string(pem.EncodeToMemory(&priv_blk))
-
-	return privatekey, publickey, nil
 }
