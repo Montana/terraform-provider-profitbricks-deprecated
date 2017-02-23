@@ -17,9 +17,6 @@ func resourceProfitBricksServer() *schema.Resource {
 		Read:   resourceProfitBricksServerRead,
 		Update: resourceProfitBricksServerUpdate,
 		Delete: resourceProfitBricksServerDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 		Schema: map[string]*schema.Schema{
 
 			//Server parameters
@@ -450,14 +447,6 @@ func resourceProfitBricksServerCreate(d *schema.ResourceData, meta interface{}) 
 func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) error {
 	dcId := d.Get("datacenter_id").(string)
 	serverId := d.Id()
-	if dcId == "" {
-		s := strings.Split(d.Id(), ";")
-		if (len(s) > 1) {
-			dcId = s[0]
-			serverId = s[1]
-			d.SetId(s[0])
-		}
-	}
 
 	server := profitbricks.GetServer(dcId, serverId)
 	primarynic := d.Get("primary_nic").(string)
@@ -470,17 +459,13 @@ func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[DEBUG] dcid, srvrid", dcId, serverId)
 
-	//nics := profitbricks.ListNics(dcId, serverId)
-
 	nic := profitbricks.GetNic(dcId, serverId, primarynic)
-	log.Printf("[DEBUG] ********nic********", nic)
 
 	if len(nic.Properties.Ips) > 0 {
 		d.Set("primary_ip", nic.Properties.Ips[0])
 	}
 
 	if nRaw, ok := d.GetOk("nic"); ok {
-		log.Printf("[DEBUG] parsing nic")
 
 		nicRaw := nRaw.(*schema.Set).List()
 
@@ -494,8 +479,6 @@ func resourceProfitBricksServerRead(d *schema.ResourceData, meta interface{}) er
 			rawMap["nat"] = nic.Properties.Nat
 			rawMap["firewall_active"] = nic.Properties.FirewallActive
 			rawMap["ips"] = nic.Properties.Ips
-			log.Printf("[DEBUG] raw nic", rawMap)
-			log.Printf("[DEBUG] nic raw", nicRaw)
 		}
 		d.Set("nic", nicRaw)
 	}
