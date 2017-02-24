@@ -193,7 +193,7 @@ Copy following into `main.tf`:
 provider "profitbricks" {
   username = "profitbricks_username"
   password = "profitbricks_password"
-  timeout = 100
+  retries = 100
 }
 
 //Virtual Data Center
