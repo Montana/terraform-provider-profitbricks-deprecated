@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go"
 	"log"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -68,6 +69,10 @@ func resourceProfitBricksDatacenterCreate(d *schema.ResourceData, meta interface
 func resourceProfitBricksDatacenterRead(d *schema.ResourceData, meta interface{}) error {
 	datacenter := profitbricks.GetDatacenter(d.Id())
 	if datacenter.StatusCode > 299 {
+		if datacenter.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
 		return fmt.Errorf("Error while fetching a data center ID %s %s", d.Id(), datacenter.Response)
 	}
 
@@ -115,8 +120,8 @@ func waitTillProvisioned(meta interface{}, path string) error {
 	config := meta.(*Config)
 	waitCount := 50
 
-	if config.Timeout != 0 {
-		waitCount = config.Timeout
+	if config.Retries != 0 {
+		waitCount = config.Retries
 	}
 	for i := 0; i < waitCount; i++ {
 		request := profitbricks.GetRequestStatus(path)
@@ -171,4 +176,9 @@ func getImageId(dcId string, imageName string, imageType string) string {
 		}
 	}
 	return ""
+}
+
+func IsValidUUID(uuid string) bool {
+	r := regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")
+	return r.MatchString(uuid)
 }

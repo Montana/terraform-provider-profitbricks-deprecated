@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go"
-	"strings"
 )
 
 func resourceProfitBricksFirewall() *schema.Resource {
@@ -129,24 +128,13 @@ func resourceProfitBricksFirewallCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceProfitBricksFirewallRead(d *schema.ResourceData, meta interface{}) error {
-	dcId := d.Get("datacenter_id").(string)
-	serverId := d.Get("server_id").(string)
-	nicId := d.Get("nic_id").(string)
-	fwId := d.Id()
-
-	if dcId == "" {
-		s := strings.Split(d.Id(), ";")
-		if (len(s) > 3) {
-			dcId = s[0]
-			serverId = s[1]
-			nicId = s[2]
-			fwId = s[3]
-		}
-	}
-
-	fw := profitbricks.GetFirewallRule(dcId, serverId, nicId, fwId)
+	fw := profitbricks.GetFirewallRule(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id())
 
 	if fw.StatusCode > 299 {
+		if fw.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
 		return fmt.Errorf("An error occured while fetching a firewall rule  dcId: %s server_id: %s  nic_id: %s ID: %s %s", d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Get("nic_id").(string), d.Id(), fw.Response)
 	}
 
