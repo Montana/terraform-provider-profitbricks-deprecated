@@ -6,7 +6,6 @@ import (
 	"github.com/profitbricks/profitbricks-sdk-go"
 	"log"
 	"time"
-	"strings"
 )
 
 func resourceProfitBricksLan() *schema.Resource {
@@ -63,19 +62,13 @@ func resourceProfitBricksLanCreate(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceProfitBricksLanRead(d *schema.ResourceData, meta interface{}) error {
-	dcId := d.Get("datacenter_id").(string)
-	lanId := d.Id()
-	if dcId == "" {
-		s := strings.Split(d.Id(), ";")
-		if (len(s) > 1) {
-			dcId = s[0]
-			lanId = s[1]
-		}
-	}
-
-	lan := profitbricks.GetLan(dcId, lanId)
+	lan := profitbricks.GetLan(d.Get("datacenter_id").(string), d.Id())
 
 	if lan.StatusCode > 299 {
+		if lan.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
 		return fmt.Errorf("An error occured while fetching a lan ID %s %s", d.Id(), lan.Response)
 	}
 

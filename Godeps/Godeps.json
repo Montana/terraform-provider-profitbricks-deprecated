@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/profitbricks/terraform-provider-profitbricks",
-	"GoVersion": "go1.7",
+	"GoVersion": "go1.8",
 	"GodepVersion": "v74",
 	"Deps": [
 		{
@@ -223,58 +223,58 @@
 		},
 		{
 			"ImportPath": "github.com/hashicorp/terraform/config",
-			"Comment": "v0.8.1-92-g379a6cc",
-			"Rev": "379a6cc97b32ae383a32de5668c14c3c498aee14"
+			"Comment": "v0.7.0-rc4-5462-gc87f3df",
+			"Rev": "c87f3dfdd54ddd06c2d2864f4e756a4d38d79bb2"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/terraform/config/module",
-			"Comment": "v0.8.1-92-g379a6cc",
-			"Rev": "379a6cc97b32ae383a32de5668c14c3c498aee14"
+			"Comment": "v0.7.0-rc4-5462-gc87f3df",
+			"Rev": "c87f3dfdd54ddd06c2d2864f4e756a4d38d79bb2"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/terraform/dag",
-			"Comment": "v0.8.1-92-g379a6cc",
-			"Rev": "379a6cc97b32ae383a32de5668c14c3c498aee14"
+			"Comment": "v0.7.0-rc4-5462-gc87f3df",
+			"Rev": "c87f3dfdd54ddd06c2d2864f4e756a4d38d79bb2"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/terraform/flatmap",
-			"Comment": "v0.8.1-92-g379a6cc",
-			"Rev": "379a6cc97b32ae383a32de5668c14c3c498aee14"
+			"Comment": "v0.7.0-rc4-5462-gc87f3df",
+			"Rev": "c87f3dfdd54ddd06c2d2864f4e756a4d38d79bb2"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/terraform/helper/experiment",
-			"Comment": "v0.8.1-92-g379a6cc",
-			"Rev": "379a6cc97b32ae383a32de5668c14c3c498aee14"
+			"Comment": "v0.7.0-rc4-5462-gc87f3df",
+			"Rev": "c87f3dfdd54ddd06c2d2864f4e756a4d38d79bb2"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/terraform/helper/hashcode",
-			"Comment": "v0.8.1-92-g379a6cc",
-			"Rev": "379a6cc97b32ae383a32de5668c14c3c498aee14"
+			"Comment": "v0.7.0-rc4-5462-gc87f3df",
+			"Rev": "c87f3dfdd54ddd06c2d2864f4e756a4d38d79bb2"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/terraform/helper/hilmapstructure",
-			"Comment": "v0.8.1-92-g379a6cc",
-			"Rev": "379a6cc97b32ae383a32de5668c14c3c498aee14"
+			"Comment": "v0.7.0-rc4-5462-gc87f3df",
+			"Rev": "c87f3dfdd54ddd06c2d2864f4e756a4d38d79bb2"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/terraform/helper/schema",
-			"Comment": "v0.8.1-92-g379a6cc",
-			"Rev": "379a6cc97b32ae383a32de5668c14c3c498aee14"
+			"Comment": "v0.7.0-rc4-5462-gc87f3df",
+			"Rev": "c87f3dfdd54ddd06c2d2864f4e756a4d38d79bb2"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/terraform/helper/shadow",
-			"Comment": "v0.8.1-92-g379a6cc",
-			"Rev": "379a6cc97b32ae383a32de5668c14c3c498aee14"
+			"Comment": "v0.7.0-rc4-5462-gc87f3df",
+			"Rev": "c87f3dfdd54ddd06c2d2864f4e756a4d38d79bb2"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/terraform/plugin",
-			"Comment": "v0.8.1-92-g379a6cc",
-			"Rev": "379a6cc97b32ae383a32de5668c14c3c498aee14"
+			"Comment": "v0.7.0-rc4-5462-gc87f3df",
+			"Rev": "c87f3dfdd54ddd06c2d2864f4e756a4d38d79bb2"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/terraform/terraform",
-			"Comment": "v0.8.1-92-g379a6cc",
-			"Rev": "379a6cc97b32ae383a32de5668c14c3c498aee14"
+			"Comment": "v0.7.0-rc4-5462-gc87f3df",
+			"Rev": "c87f3dfdd54ddd06c2d2864f4e756a4d38d79bb2"
 		},
 		{
 			"ImportPath": "github.com/hashicorp/yamux",
@@ -294,6 +294,10 @@
 			"Rev": "756f7b183b7ab78acdbbee5c7f392838ed459dda"
 		},
 		{
+			"ImportPath": "github.com/mitchellh/hashstructure",
+			"Rev": "ab25296c0f51f1022f01cd99dfb45f1775de8799"
+		},
+		{
 			"ImportPath": "github.com/mitchellh/mapstructure",
 			"Rev": "f3009df150dadf309fdee4a54ed65c124afad715"
 		},
@@ -303,8 +307,8 @@
 		},
 		{
 			"ImportPath": "github.com/profitbricks/profitbricks-sdk-go",
-			"Comment": "v3.0.1-2-gb279e1a",
-			"Rev": "b279e1adcaf1c9cae4d6520c1bdbbf4674e7806e"
+			"Comment": "v3.0.2-1-g1bbd584",
+			"Rev": "1bbd584f0c2a60fac8dd9273a6ef22f85f4d27db"
 		},
 		{
 			"ImportPath": "github.com/satori/go.uuid",
