@@ -120,11 +120,6 @@ resource "profitbricks_firewall" "webserver_https" {
   port_range_end   = 443
 }
 
-//MongoDB Server
-//resource "profitbricks_ipblock" "database_ip" {
-//  location = "${profitbricks_datacenter.main.location}"
-//  size     = 1
-//}
 
 resource "profitbricks_server" "database" {
   name              = "mongodb"
