@@ -14,9 +14,6 @@ func resourceProfitBricksNic() *schema.Resource {
 		Read:   resourceProfitBricksNicRead,
 		Update: resourceProfitBricksNicUpdate,
 		Delete: resourceProfitBricksNicDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 		Schema: map[string]*schema.Schema{
 
 			"lan": {
@@ -35,17 +32,17 @@ func resourceProfitBricksNic() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"ips" : {
-				Type: schema.TypeList,
+			"ips": {
+				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed:true,
+				Computed: true,
 			},
 			"firewall_active": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"nat" :{
-				Type: schema.TypeBool,
+			"nat": {
+				Type:     schema.TypeBool,
 				Optional: true,
 			},
 			"server_id": {
@@ -112,9 +109,13 @@ func resourceProfitBricksNicCreate(d *schema.ResourceData, meta interface{}) err
 func resourceProfitBricksNicRead(d *schema.ResourceData, meta interface{}) error {
 	nic := profitbricks.GetNic(d.Get("datacenter_id").(string), d.Get("server_id").(string), d.Id())
 	if nic.StatusCode > 299 {
+		if nic.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
 		return fmt.Errorf("Error occured while fetching a nic ID %s %s", d.Id(), nic.Response)
 	}
-	log.Printf("[INFO] LAN ON NIC: %s", nic.Properties.Lan)
+	log.Printf("[INFO] LAN ON NIC: %d", nic.Properties.Lan)
 	d.Set("dhcp", nic.Properties.Dhcp)
 	d.Set("lan", nic.Properties.Lan)
 	d.Set("name", nic.Properties.Name)

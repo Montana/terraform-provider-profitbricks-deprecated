@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go"
 	"log"
-	"strings"
 )
 
 func resourceProfitBricksVolume() *schema.Resource {
@@ -14,9 +13,6 @@ func resourceProfitBricksVolume() *schema.Resource {
 		Read:   resourceProfitBricksVolumeRead,
 		Update: resourceProfitBricksVolumeUpdate,
 		Delete: resourceProfitBricksVolumeDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 		Schema: map[string]*schema.Schema{
 			"image_name": {
 				Type:     schema.TypeString,
@@ -99,12 +95,18 @@ func resourceProfitBricksVolumeCreate(d *schema.ResourceData, meta interface{}) 
 			log.Printf("[DEBUG] Reading file %s", path)
 			publicKey, err := readPublicKey(path.(string))
 			if err != nil {
-				return fmt.Errorf("Error fetching sshkey from file (%s)", path, err)
+				return fmt.Errorf("Error fetching sshkey from file (%s) (%s)", path, err.Error())
 			}
 			publicKeys = append(publicKeys, publicKey)
 		}
 	}
-	image := getImageId(d.Get("datacenter_id").(string), image_name, d.Get("disk_type").(string))
+
+	var image string
+	if !IsValidUUID(image_name) {
+		image = getImageId(d.Get("datacenter_id").(string), image_name, d.Get("disk_type").(string))
+	} else {
+		image = image_name
+	}
 
 	volume := profitbricks.Volume{
 		Properties: profitbricks.VolumeProperties{
@@ -155,18 +157,21 @@ func resourceProfitBricksVolumeCreate(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceProfitBricksVolumeRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	profitbricks.SetAuth(config.Username, config.Password)
+
 	dcId := d.Get("datacenter_id").(string)
 
-	volumeId := d.Id()
-	if dcId == "" {
-		s := strings.Split(d.Id(), ";")
-		if (len(s) > 1) {
-			dcId = s[0]
-			volumeId = s[1]
+	volume := profitbricks.GetVolume(dcId, d.Id())
+
+	if volume.StatusCode > 299 {
+		if volume.StatusCode == 404 {
+			d.SetId("")
+			return nil
 		}
+		return fmt.Errorf("Error occured while fetching a volume ID %s %s", d.Id(), volume.Response)
 	}
 
-	volume := profitbricks.GetVolume(dcId, volumeId)
 	if volume.StatusCode > 299 {
 		return fmt.Errorf("An error occured while fetching a volume ID %s %s", d.Id(), volume.Response)
 

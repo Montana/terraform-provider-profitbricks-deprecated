@@ -1,6 +1,7 @@
 package profitbricks
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/profitbricks/profitbricks-sdk-go"
@@ -31,6 +32,7 @@ func Provider() terraform.ResourceProvider {
 			"retries": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  50,
 			},
 		},
 
@@ -49,17 +51,26 @@ func Provider() terraform.ResourceProvider {
 			"profitbricks_location":   dataSourceLocation(),
 			"profitbricks_image":      dataSourceImage(),
 		},
-
 		ConfigureFunc: providerConfigure,
 	}
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+
+	if _, ok := d.GetOk("username"); !ok {
+		return nil, fmt.Errorf("ProfitBricks username has not been provided.")
+	}
+
+	if _, ok := d.GetOk("password"); !ok {
+		return nil, fmt.Errorf("ProfitBricks password has not been provided.")
+	}
+
 	config := Config{
 		Username: d.Get("username").(string),
 		Password: d.Get("password").(string),
 		Endpoint: d.Get("endpoint").(string),
-		Timeout:  d.Get("retries").(int),
+		Retries:  d.Get("retries").(int),
 	}
+
 	return config.Client()
 }

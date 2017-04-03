@@ -30,7 +30,7 @@ resource "profitbricks_lan" "webserver_lan" {
 //IP Block
 resource "profitbricks_ipblock" "webserver_ip" {
   location = "${data.profitbricks_location.loc.id}"
-  size = 1
+  size = 2
 }
 
 resource "profitbricks_server" "webserver" {
@@ -54,7 +54,7 @@ resource "profitbricks_server" "webserver" {
   nic {
     lan = "${profitbricks_lan.webserver_lan.id}"
     dhcp = true
-    ip = "${profitbricks_ipblock.webserver_ip.0.ips}"
+    ip = "${profitbricks_ipblock.webserver_ip.ips.0}"
     //firewall_active = true
 
     firewall {
@@ -120,11 +120,6 @@ resource "profitbricks_firewall" "webserver_https" {
   port_range_end   = 443
 }
 
-//MongoDB Server
-resource "profitbricks_ipblock" "database_ip" {
-  location = "${profitbricks_datacenter.main.location}"
-  size     = 1
-}
 
 resource "profitbricks_server" "database" {
   name              = "mongodb"
@@ -147,7 +142,7 @@ resource "profitbricks_server" "database" {
   nic {
     lan             = "${profitbricks_lan.webserver_lan.id}"
     dhcp            = true
-    ip              = "${profitbricks_ipblock.database_ip.0.ips}"
+    ip              = "${profitbricks_ipblock.webserver_ip.ips.1}"
     firewall_active = true
 
     firewall {

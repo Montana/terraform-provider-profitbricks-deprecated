@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/profitbricks/profitbricks-sdk-go"
-	"strings"
 )
 
 func resourceProfitBricksLoadbalancer() *schema.Resource {
@@ -13,9 +12,6 @@ func resourceProfitBricksLoadbalancer() *schema.Resource {
 		Read:   resourceProfitBricksLoadbalancerRead,
 		Update: resourceProfitBricksLoadbalancerUpdate,
 		Delete: resourceProfitBricksLoadbalancerDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 		Schema: map[string]*schema.Schema{
 
 			"name": &schema.Schema{
@@ -77,17 +73,15 @@ func resourceProfitBricksLoadbalancerCreate(d *schema.ResourceData, meta interfa
 }
 
 func resourceProfitBricksLoadbalancerRead(d *schema.ResourceData, meta interface{}) error {
-	dcId := d.Get("datacenter_id").(string)
-	lbId := d.Id()
-	if dcId == "" {
-		s := strings.Split(d.Id(), ";")
-		if (len(s) > 1) {
-			dcId = s[0]
-			lbId = s[1]
-		}
-	}
+	lb := profitbricks.GetLoadbalancer(d.Get("datacenter_id").(string), d.Id())
 
-	lb := profitbricks.GetLoadbalancer(dcId, lbId)
+	if lb.StatusCode > 299 {
+		if lb.StatusCode == 404 {
+			d.SetId("")
+			return nil
+		}
+		return fmt.Errorf("An error occured while fetching a lan ID %s %s", d.Id(), lb.Response)
+	}
 
 	d.Set("name", lb.Properties.Name)
 	d.Set("ip", lb.Properties.Ip)
