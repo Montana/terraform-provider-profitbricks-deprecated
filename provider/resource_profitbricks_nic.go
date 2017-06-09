@@ -32,6 +32,10 @@ func resourceProfitBricksNic() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"mac": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"ips": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -120,6 +124,7 @@ func resourceProfitBricksNicRead(d *schema.ResourceData, meta interface{}) error
 	d.Set("lan", nic.Properties.Lan)
 	d.Set("name", nic.Properties.Name)
 	d.Set("ips", nic.Properties.Ips)
+	d.Set("mac", nic.Properties.Mac)
 
 	return nil
 }
